@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import { NavLink, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import ProtectedRoute from "./features/auth/components/ProtectedRoute";
 
 import DashboardPage from "./pages/DashboardPage";
 import HomePage from "./pages/HomePage";
@@ -170,13 +171,62 @@ function LandingPage() {
         <main className="content-section">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/data-entry" element={<DataEntryPage />} />
-            <Route path="/recommendations" element={<Recommendations />} />
-            <Route path="/import-export" element={<ImportExportPage />} />
+
+            <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/data-entry"
+                element={
+                  <ProtectedRoute>
+                    <DataEntryPage />
+                  </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/recommendations"
+                element={
+                  <ProtectedRoute>
+                    <Recommendations />
+                  </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/import-export"
+                element={
+                  <ProtectedRoute>
+                    <ImportExportPage />
+                  </ProtectedRoute>
+                }
+            />
+
             <Route path="/weather" element={<WeatherPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/admin" element={<AdminPage />} />
+
+            <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requiredRole="ADMIN">
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+            />
           </Routes>
         </main>
 

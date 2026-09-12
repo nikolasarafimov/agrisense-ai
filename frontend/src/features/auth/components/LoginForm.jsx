@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiRequest, saveCurrentUser } from "../../../api";
 
 function LoginForm() {
     const navigate = useNavigate();
+
+    const location = useLocation();
+
+    const redirectPath =
+        location.state?.from?.pathname || "/dashboard";
 
     const [formData, setFormData] = useState({
         email: "",
@@ -57,7 +62,7 @@ function LoginForm() {
             });
 
             setTimeout(() => {
-                navigate("/dashboard");
+                navigate(redirectPath, { replace: true });
             }, 700);
         } catch (error) {
             setStatus({

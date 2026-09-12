@@ -90,10 +90,6 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
         }
 
-        if (userDetails.getRole() != null && !userDetails.getRole().isBlank()) {
-            user.setRole(userDetails.getRole());
-        }
-
         return userRepository.save(user);
     }
 

@@ -1,9 +1,6 @@
 export const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
-export const DEFAULT_DEMO_USER_ID =
-    Number(import.meta.env.VITE_DEMO_USER_ID) || 1;
-
 export function saveCurrentUser(user) {
     localStorage.setItem("currentUser", JSON.stringify(user));
 }
@@ -25,8 +22,7 @@ export function getCurrentUser() {
 }
 
 export function getCurrentUserId() {
-    const user = getCurrentUser();
-    return user?.id || DEFAULT_DEMO_USER_ID;
+    return getCurrentUser()?.id ?? null;
 }
 
 export function clearCurrentUser() {

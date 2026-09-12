@@ -117,7 +117,6 @@ export default function ProfilePage() {
         const payload = {
             fullName: formData.fullName,
             email: formData.email,
-            role: formData.role || "USER",
         };
 
         if (formData.password.trim()) {
