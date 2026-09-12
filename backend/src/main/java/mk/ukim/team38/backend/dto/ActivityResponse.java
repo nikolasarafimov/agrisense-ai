@@ -1,9 +1,11 @@
 package mk.ukim.team38.backend.dto;
 
+import java.time.LocalDate;
+
 public record ActivityResponse(
         Long id,
         String description,
-        String date,
+        LocalDate date,
         String type
 ) {
 }

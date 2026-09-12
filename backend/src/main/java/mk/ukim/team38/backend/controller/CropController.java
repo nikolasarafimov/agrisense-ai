@@ -53,7 +53,7 @@ public class CropController {
         crop.setName(request.name());
         crop.setType(request.type());
         crop.setPlantingDate(
-                request.plantingDate().toString()
+                request.plantingDate()
         );
 
         Crop savedCrop =
@@ -74,7 +74,7 @@ public class CropController {
         cropDetails.setName(request.name());
         cropDetails.setType(request.type());
         cropDetails.setPlantingDate(
-                request.plantingDate().toString()
+                request.plantingDate()
         );
 
         return toResponse(

@@ -55,7 +55,7 @@ public class ActivityController {
                 request.description()
         );
         activity.setDate(
-                request.date().toString()
+                request.date()
         );
         activity.setType(
                 request.type()
@@ -81,7 +81,7 @@ public class ActivityController {
                 request.description()
         );
         activityDetails.setDate(
-                request.date().toString()
+                request.date()
         );
         activityDetails.setType(
                 request.type()

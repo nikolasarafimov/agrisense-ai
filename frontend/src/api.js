@@ -29,10 +29,6 @@ export function getCurrentUser() {
     }
 }
 
-export function getCurrentUserId() {
-    return getCurrentUser()?.id ?? null;
-}
-
 export function getAuthToken() {
     return getCurrentUser()?.token ?? null;
 }

@@ -1,8 +1,15 @@
 package mk.ukim.team38.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDate;
 
 @Entity
 public class Activity {
@@ -14,8 +21,8 @@ public class Activity {
     @NotBlank(message = "Description is required.")
     private String description;
 
-    @NotBlank(message = "Date is required.")
-    private String date;
+    @NotNull(message = "Date is required.")
+    private LocalDate date;
 
     @NotBlank(message = "Activity type is required.")
     private String type;
@@ -27,7 +34,11 @@ public class Activity {
     public Activity() {
     }
 
-    public Activity(String description, String date, String type) {
+    public Activity(
+            String description,
+            LocalDate date,
+            String type
+    ) {
         this.description = description;
         this.date = date;
         this.type = type;
@@ -41,7 +52,7 @@ public class Activity {
         return description;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
@@ -61,7 +72,7 @@ public class Activity {
         this.description = description;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

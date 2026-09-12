@@ -13,11 +13,6 @@ public interface CropRepository extends JpaRepository<Crop, Long> {
 
     long countByUser(User user);
 
-    List<Crop> findByNameContainingIgnoreCaseOrTypeContainingIgnoreCase(
-            String name,
-            String type
-    );
-
     List<Crop> findByUserAndNameContainingIgnoreCaseOrUserAndTypeContainingIgnoreCase(
             User user1,
             String name,
