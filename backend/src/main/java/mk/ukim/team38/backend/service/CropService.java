@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import mk.ukim.team38.backend.model.Crop;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.CropRepository;
-import mk.ukim.team38.backend.repository.UserRepository;
+import mk.ukim.team38.backend.security.AuthenticatedUserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,64 +15,66 @@ import java.util.Optional;
 public class CropService {
 
     private final CropRepository cropRepository;
-    private final UserRepository userRepository;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public List<Crop> findAll(Long userId, String search) {
-        User user = getUserOrNull(userId);
+    public List<Crop> findAll(String search) {
+        User user = authenticatedUserService.getCurrentUser();
 
         if (search != null && !search.isBlank()) {
-            if (user != null) {
-                return cropRepository.findByUserAndNameContainingIgnoreCaseOrUserAndTypeContainingIgnoreCase(
-                        user,
-                        search,
-                        user,
-                        search
-                );
-            }
-
-            return cropRepository.findByNameContainingIgnoreCaseOrTypeContainingIgnoreCase(search, search);
+            return cropRepository
+                    .findByUserAndNameContainingIgnoreCaseOrUserAndTypeContainingIgnoreCase(
+                            user,
+                            search,
+                            user,
+                            search
+                    );
         }
 
-        if (user != null) {
-            return cropRepository.findByUser(user);
-        }
-
-        return cropRepository.findAll();
+        return cropRepository.findByUser(user);
     }
 
     public Optional<Crop> findById(Long id) {
-        return cropRepository.findById(id);
+        User user = authenticatedUserService.getCurrentUser();
+
+        return cropRepository.findByIdAndUser(id, user);
     }
 
     public Crop save(Crop crop) {
+        User user = authenticatedUserService.getCurrentUser();
+
+        crop.setId(null);
+        crop.setUser(user);
+
         return cropRepository.save(crop);
     }
 
     public Crop update(Long id, Crop cropDetails) {
-        Crop crop = cropRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Crop not found with id: " + id));
+        User user = authenticatedUserService.getCurrentUser();
+
+        Crop crop = cropRepository.findByIdAndUser(id, user)
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "Crop not found with id: " + id
+                        )
+                );
 
         crop.setName(cropDetails.getName());
         crop.setType(cropDetails.getType());
         crop.setPlantingDate(cropDetails.getPlantingDate());
 
-        if (cropDetails.getUser() != null) {
-            crop.setUser(cropDetails.getUser());
-        }
-
         return cropRepository.save(crop);
     }
 
     public void deleteById(Long id) {
-        cropRepository.deleteById(id);
-    }
+        User user = authenticatedUserService.getCurrentUser();
 
-    private User getUserOrNull(Long userId) {
-        if (userId == null) {
-            return null;
-        }
+        Crop crop = cropRepository.findByIdAndUser(id, user)
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "Crop not found with id: " + id
+                        )
+                );
 
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        cropRepository.delete(crop);
     }
 }

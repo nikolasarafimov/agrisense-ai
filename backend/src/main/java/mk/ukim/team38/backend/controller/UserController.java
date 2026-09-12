@@ -5,12 +5,13 @@ import lombok.RequiredArgsConstructor;
 import mk.ukim.team38.backend.dto.AuthResponse;
 import mk.ukim.team38.backend.dto.LoginRequest;
 import mk.ukim.team38.backend.dto.RegisterRequest;
+import mk.ukim.team38.backend.dto.UpdateProfileRequest;
+import mk.ukim.team38.backend.dto.UserProfileResponse;
 import mk.ukim.team38.backend.model.User;
+import mk.ukim.team38.backend.security.AuthenticatedUserService;
 import mk.ukim.team38.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -18,51 +19,45 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final AuthenticatedUserService authenticatedUserService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(userService.register(request));
+    public ResponseEntity<AuthResponse> register(
+            @Valid @RequestBody RegisterRequest request
+    ) {
+        return ResponseEntity.ok(
+                userService.register(request)
+        );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.login(request));
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest request
+    ) {
+        return ResponseEntity.ok(
+                userService.login(request)
+        );
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout() {
-        return ResponseEntity.ok("Logout successful.");
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> getCurrentUser() {
+        User user =
+                authenticatedUserService.getCurrentUser();
+
+        return ResponseEntity.ok(
+                userService.getProfile(user)
+        );
     }
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.findAll();
-    }
+    @PutMapping("/me")
+    public ResponseEntity<AuthResponse> updateCurrentUser(
+            @Valid @RequestBody UpdateProfileRequest request
+    ) {
+        User user =
+                authenticatedUserService.getCurrentUser();
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
-        return userService.save(user);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
-        try {
-            return ResponseEntity.ok(userService.update(id, userDetails));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(
+                userService.updateProfile(user, request)
+        );
     }
 }

@@ -35,7 +35,7 @@ export default function ProfilePage() {
             });
 
             try {
-                const user = await apiRequest(`/api/users/${currentUser.id}`);
+                const user = await apiRequest("/api/users/me");
 
                 setFormData({
                     fullName: user.fullName || "",
@@ -124,10 +124,15 @@ export default function ProfilePage() {
         }
 
         try {
-            const updatedUser = await apiRequest(`/api/users/${currentUser.id}`, {
-                method: "PUT",
-                body: JSON.stringify(payload),
-            });
+            const updatedUser = await apiRequest(
+                "/api/users/me",
+                {
+                    method: "PUT",
+                    body: JSON.stringify(payload),
+                },
+            );
+
+            saveCurrentUser(updatedUser);
 
             const storedUser = {
                 id: updatedUser.id,

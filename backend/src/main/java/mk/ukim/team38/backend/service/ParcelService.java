@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import mk.ukim.team38.backend.model.Parcel;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.ParcelRepository;
-import mk.ukim.team38.backend.repository.UserRepository;
+import mk.ukim.team38.backend.security.AuthenticatedUserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,64 +15,66 @@ import java.util.Optional;
 public class ParcelService {
 
     private final ParcelRepository parcelRepository;
-    private final UserRepository userRepository;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public List<Parcel> findAll(Long userId, String search) {
-        User user = getUserOrNull(userId);
+    public List<Parcel> findAll(String search) {
+        User user = authenticatedUserService.getCurrentUser();
 
         if (search != null && !search.isBlank()) {
-            if (user != null) {
-                return parcelRepository.findByUserAndLocationContainingIgnoreCaseOrUserAndSoilTypeContainingIgnoreCase(
-                        user,
-                        search,
-                        user,
-                        search
-                );
-            }
-
-            return parcelRepository.findByLocationContainingIgnoreCaseOrSoilTypeContainingIgnoreCase(search, search);
+            return parcelRepository
+                    .findByUserAndLocationContainingIgnoreCaseOrUserAndSoilTypeContainingIgnoreCase(
+                            user,
+                            search,
+                            user,
+                            search
+                    );
         }
 
-        if (user != null) {
-            return parcelRepository.findByUser(user);
-        }
-
-        return parcelRepository.findAll();
+        return parcelRepository.findByUser(user);
     }
 
     public Optional<Parcel> findById(Long id) {
-        return parcelRepository.findById(id);
+        User user = authenticatedUserService.getCurrentUser();
+
+        return parcelRepository.findByIdAndUser(id, user);
     }
 
     public Parcel save(Parcel parcel) {
+        User user = authenticatedUserService.getCurrentUser();
+
+        parcel.setId(null);
+        parcel.setUser(user);
+
         return parcelRepository.save(parcel);
     }
 
     public Parcel update(Long id, Parcel parcelDetails) {
-        Parcel parcel = parcelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Parcel not found with id: " + id));
+        User user = authenticatedUserService.getCurrentUser();
+
+        Parcel parcel = parcelRepository.findByIdAndUser(id, user)
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "Parcel not found with id: " + id
+                        )
+                );
 
         parcel.setLocation(parcelDetails.getLocation());
         parcel.setSize(parcelDetails.getSize());
         parcel.setSoilType(parcelDetails.getSoilType());
 
-        if (parcelDetails.getUser() != null) {
-            parcel.setUser(parcelDetails.getUser());
-        }
-
         return parcelRepository.save(parcel);
     }
 
     public void deleteById(Long id) {
-        parcelRepository.deleteById(id);
-    }
+        User user = authenticatedUserService.getCurrentUser();
 
-    private User getUserOrNull(Long userId) {
-        if (userId == null) {
-            return null;
-        }
+        Parcel parcel = parcelRepository.findByIdAndUser(id, user)
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "Parcel not found with id: " + id
+                        )
+                );
 
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        parcelRepository.delete(parcel);
     }
 }

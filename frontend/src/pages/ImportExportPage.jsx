@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE_URL, getCurrentUserId } from "../api";
+import { API_BASE_URL, getAuthToken } from "../api";
 
 const EXPORT_OPTIONS = [
     {
@@ -56,15 +56,29 @@ const IMPORT_OPTIONS = [
 ];
 
 export default function ImportExportPage() {
-    const activeUserId = getCurrentUserId();
 
     const [status, setStatus] = useState({
         message: "",
         type: "",
     });
 
-    const buildUrlWithUserId = (endpoint) => {
-        return `${API_BASE_URL}${endpoint}?userId=${activeUserId}`;
+    const authenticatedFetch = (endpoint, options = {}) => {
+        const token = getAuthToken();
+
+        const {
+            headers: customHeaders = {},
+            ...requestOptions
+        } = options;
+
+        return fetch(`${API_BASE_URL}${endpoint}`, {
+            ...requestOptions,
+            headers: {
+                ...customHeaders,
+                ...(token
+                    ? { Authorization: `Bearer ${token}` }
+                    : {}),
+            },
+        });
     };
 
     const downloadFile = async (option) => {
@@ -74,7 +88,9 @@ export default function ImportExportPage() {
         });
 
         try {
-            const response = await fetch(buildUrlWithUserId(option.endpoint));
+            const response = await authenticatedFetch(
+                option.endpoint
+            );
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -125,10 +141,13 @@ export default function ImportExportPage() {
         formData.append("file", file);
 
         try {
-            const response = await fetch(buildUrlWithUserId(option.endpoint), {
-                method: "POST",
-                body: formData,
-            });
+            const response = await authenticatedFetch(
+                option.endpoint,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -170,10 +189,6 @@ export default function ImportExportPage() {
                     and importing datasets back into the system. All operations are
                     connected to the active user.
                 </p>
-
-                <div className="current-user-box">
-                    Active user ID for import/export: <strong>{activeUserId}</strong>
-                </div>
             </section>
 
             <section className="import-export-grid">

@@ -18,10 +18,9 @@ public class CropController {
 
     @GetMapping
     public List<Crop> getAllCrops(
-            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String search
     ) {
-        return cropService.findAll(userId, search);
+        return cropService.findAll(search);
     }
 
     @GetMapping("/{id}")

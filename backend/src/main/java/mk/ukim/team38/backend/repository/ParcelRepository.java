@@ -5,6 +5,7 @@ import mk.ukim.team38.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ParcelRepository extends JpaRepository<Parcel, Long> {
 
@@ -18,4 +19,8 @@ public interface ParcelRepository extends JpaRepository<Parcel, Long> {
             User user2,
             String soilType
     );
+
+    Optional<Parcel> findByIdAndUser(Long id, User user);
+
+    void deleteByUser(User user);
 }

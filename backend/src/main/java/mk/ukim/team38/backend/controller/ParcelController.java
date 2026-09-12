@@ -18,10 +18,9 @@ public class ParcelController {
 
     @GetMapping
     public List<Parcel> getAllParcels(
-            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String search
     ) {
-        return parcelService.findAll(userId, search);
+        return parcelService.findAll(search);
     }
 
     @GetMapping("/{id}")

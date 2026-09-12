@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import mk.ukim.team38.backend.model.Activity;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.ActivityRepository;
-import mk.ukim.team38.backend.repository.UserRepository;
+import mk.ukim.team38.backend.security.AuthenticatedUserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,64 +15,77 @@ import java.util.Optional;
 public class ActivityService {
 
     private final ActivityRepository activityRepository;
-    private final UserRepository userRepository;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public List<Activity> findAll(Long userId, String search) {
-        User user = getUserOrNull(userId);
+    public List<Activity> findAll(String search) {
+        User user = authenticatedUserService.getCurrentUser();
 
         if (search != null && !search.isBlank()) {
-            if (user != null) {
-                return activityRepository.findByUserAndDescriptionContainingIgnoreCaseOrUserAndTypeContainingIgnoreCase(
-                        user,
-                        search,
-                        user,
-                        search
-                );
-            }
-
-            return activityRepository.findByDescriptionContainingIgnoreCaseOrTypeContainingIgnoreCase(search, search);
+            return activityRepository
+                    .findByUserAndDescriptionContainingIgnoreCaseOrUserAndTypeContainingIgnoreCase(
+                            user,
+                            search,
+                            user,
+                            search
+                    );
         }
 
-        if (user != null) {
-            return activityRepository.findByUser(user);
-        }
-
-        return activityRepository.findAll();
+        return activityRepository.findByUser(user);
     }
 
     public Optional<Activity> findById(Long id) {
-        return activityRepository.findById(id);
+        User user = authenticatedUserService.getCurrentUser();
+
+        return activityRepository.findByIdAndUser(id, user);
     }
 
     public Activity save(Activity activity) {
+        User user = authenticatedUserService.getCurrentUser();
+
+        activity.setId(null);
+        activity.setUser(user);
+
         return activityRepository.save(activity);
     }
 
-    public Activity update(Long id, Activity activityDetails) {
-        Activity activity = activityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Activity not found with id: " + id));
+    public Activity update(
+            Long id,
+            Activity activityDetails
+    ) {
+        User user = authenticatedUserService.getCurrentUser();
 
-        activity.setDescription(activityDetails.getDescription());
-        activity.setDate(activityDetails.getDate());
-        activity.setType(activityDetails.getType());
+        Activity activity =
+                activityRepository.findByIdAndUser(id, user)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Activity not found with id: " + id
+                                )
+                        );
 
-        if (activityDetails.getUser() != null) {
-            activity.setUser(activityDetails.getUser());
-        }
+        activity.setDescription(
+                activityDetails.getDescription()
+        );
+        activity.setDate(
+                activityDetails.getDate()
+        );
+        activity.setType(
+                activityDetails.getType()
+        );
 
         return activityRepository.save(activity);
     }
 
     public void deleteById(Long id) {
-        activityRepository.deleteById(id);
-    }
+        User user = authenticatedUserService.getCurrentUser();
 
-    private User getUserOrNull(Long userId) {
-        if (userId == null) {
-            return null;
-        }
+        Activity activity =
+                activityRepository.findByIdAndUser(id, user)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Activity not found with id: " + id
+                                )
+                        );
 
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        activityRepository.delete(activity);
     }
 }

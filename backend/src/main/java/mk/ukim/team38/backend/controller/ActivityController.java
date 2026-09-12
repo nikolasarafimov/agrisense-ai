@@ -18,10 +18,9 @@ public class ActivityController {
 
     @GetMapping
     public List<Activity> getAllActivities(
-            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String search
     ) {
-        return activityService.findAll(userId, search);
+        return activityService.findAll(search);
     }
 
     @GetMapping("/{id}")

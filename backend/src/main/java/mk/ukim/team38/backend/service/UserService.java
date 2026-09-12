@@ -9,6 +9,8 @@ import mk.ukim.team38.backend.repository.UserRepository;
 import mk.ukim.team38.backend.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import mk.ukim.team38.backend.dto.UpdateProfileRequest;
+import mk.ukim.team38.backend.dto.UserProfileResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -142,6 +144,48 @@ public class UserService {
                 user.getRole(),
                 token,
                 message
+        );
+    }
+
+    public UserProfileResponse getProfile(User user) {
+        return new UserProfileResponse(
+                user.getId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getRole()
+        );
+    }
+
+    public AuthResponse updateProfile(
+            User user,
+            UpdateProfileRequest request
+    ) {
+        if (
+                !user.getEmail().equalsIgnoreCase(request.getEmail())
+                        && userRepository.existsByEmail(request.getEmail())
+        ) {
+            throw new RuntimeException(
+                    "User with this email already exists."
+            );
+        }
+
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+
+        if (
+                request.getPassword() != null
+                        && !request.getPassword().isBlank()
+        ) {
+            user.setPassword(
+                    passwordEncoder.encode(request.getPassword())
+            );
+        }
+
+        User savedUser = userRepository.save(user);
+
+        return buildAuthResponse(
+                savedUser,
+                "Profile updated successfully."
         );
     }
 }
