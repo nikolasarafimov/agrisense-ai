@@ -1,6 +1,7 @@
 package mk.ukim.team38.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import mk.ukim.team38.backend.exception.ResourceNotFoundException;
 import mk.ukim.team38.backend.model.Activity;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.ActivityRepository;
@@ -54,23 +55,17 @@ public class ActivityService {
     ) {
         User user = authenticatedUserService.getCurrentUser();
 
-        Activity activity =
-                activityRepository.findByIdAndUser(id, user)
-                        .orElseThrow(
-                                () -> new RuntimeException(
-                                        "Activity not found with id: " + id
-                                )
-                        );
+        Activity activity = activityRepository
+                .findByIdAndUser(id, user)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                "Activity not found with id: " + id
+                        )
+                );
 
-        activity.setDescription(
-                activityDetails.getDescription()
-        );
-        activity.setDate(
-                activityDetails.getDate()
-        );
-        activity.setType(
-                activityDetails.getType()
-        );
+        activity.setDescription(activityDetails.getDescription());
+        activity.setDate(activityDetails.getDate());
+        activity.setType(activityDetails.getType());
 
         return activityRepository.save(activity);
     }
@@ -78,13 +73,13 @@ public class ActivityService {
     public void deleteById(Long id) {
         User user = authenticatedUserService.getCurrentUser();
 
-        Activity activity =
-                activityRepository.findByIdAndUser(id, user)
-                        .orElseThrow(
-                                () -> new RuntimeException(
-                                        "Activity not found with id: " + id
-                                )
-                        );
+        Activity activity = activityRepository
+                .findByIdAndUser(id, user)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                "Activity not found with id: " + id
+                        )
+                );
 
         activityRepository.delete(activity);
     }

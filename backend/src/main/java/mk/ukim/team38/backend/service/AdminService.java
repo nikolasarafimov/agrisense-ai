@@ -2,6 +2,7 @@ package mk.ukim.team38.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import mk.ukim.team38.backend.dto.UserProfileResponse;
+import mk.ukim.team38.backend.exception.ResourceNotFoundException;
 import mk.ukim.team38.backend.model.Activity;
 import mk.ukim.team38.backend.model.Crop;
 import mk.ukim.team38.backend.model.Parcel;
@@ -58,7 +59,7 @@ public class AdminService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(
-                        () -> new IllegalArgumentException(
+                        () -> new ResourceNotFoundException(
                                 "User not found with id: " + id
                         )
                 );
@@ -72,7 +73,7 @@ public class AdminService {
 
     public void deleteCrop(Long id) {
         if (!cropRepository.existsById(id)) {
-            throw new IllegalArgumentException(
+            throw new ResourceNotFoundException(
                     "Crop not found with id: " + id
             );
         }
@@ -82,7 +83,7 @@ public class AdminService {
 
     public void deleteParcel(Long id) {
         if (!parcelRepository.existsById(id)) {
-            throw new IllegalArgumentException(
+            throw new ResourceNotFoundException(
                     "Parcel not found with id: " + id
             );
         }
@@ -92,7 +93,7 @@ public class AdminService {
 
     public void deleteActivity(Long id) {
         if (!activityRepository.existsById(id)) {
-            throw new IllegalArgumentException(
+            throw new ResourceNotFoundException(
                     "Activity not found with id: " + id
             );
         }

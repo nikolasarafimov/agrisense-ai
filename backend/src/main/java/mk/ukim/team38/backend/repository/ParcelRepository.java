@@ -11,7 +11,12 @@ public interface ParcelRepository extends JpaRepository<Parcel, Long> {
 
     List<Parcel> findByUser(User user);
 
-    List<Parcel> findByLocationContainingIgnoreCaseOrSoilTypeContainingIgnoreCase(String location, String soilType);
+    long countByUser(User user);
+
+    List<Parcel> findByLocationContainingIgnoreCaseOrSoilTypeContainingIgnoreCase(
+            String location,
+            String soilType
+    );
 
     List<Parcel> findByUserAndLocationContainingIgnoreCaseOrUserAndSoilTypeContainingIgnoreCase(
             User user1,

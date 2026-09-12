@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { API_BASE_URL, getCurrentUserId } from "../api";
+
+import {
+    apiRequest,
+} from "../api";
+
 
 const initialCropData = {
     name: "",
@@ -7,11 +11,13 @@ const initialCropData = {
     plantingDate: "",
 };
 
+
 const initialParcelData = {
     location: "",
     size: "",
     soilType: "",
 };
+
 
 const initialActivityData = {
     description: "",
@@ -19,87 +25,138 @@ const initialActivityData = {
     type: "",
 };
 
+
 export default function DataEntryPage() {
-    const activeUserId = getCurrentUserId();
-    const [activeTab, setActiveTab] = useState("crop");
 
-    const [cropData, setCropData] = useState(initialCropData);
-    const [parcelData, setParcelData] = useState(initialParcelData);
-    const [activityData, setActivityData] = useState(initialActivityData);
+    const [activeTab, setActiveTab] =
+        useState("crop");
 
-    const [status, setStatus] = useState({
-        message: "",
-        type: "",
-    });
+    const [cropData, setCropData] =
+        useState(initialCropData);
 
-    const [lastSavedRecord, setLastSavedRecord] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [parcelData, setParcelData] =
+        useState(initialParcelData);
+
+    const [activityData, setActivityData] =
+        useState(initialActivityData);
+
+    const [status, setStatus] =
+        useState({
+            message: "",
+            type: "",
+        });
+
+    const [
+        lastSavedRecord,
+        setLastSavedRecord,
+    ] =
+        useState(null);
+
+    const [
+        isSubmitting,
+        setIsSubmitting,
+    ] =
+        useState(false);
+
 
     const handleCropChange = (event) => {
-        const { name, value } = event.target;
 
-        setCropData((previousData) => ({
-            ...previousData,
-            [name]: value,
-        }));
+        const {
+            name,
+            value,
+        } =
+            event.target;
+
+        setCropData(
+            (previousData) => ({
+                ...previousData,
+                [name]: value,
+            }),
+        );
     };
+
 
     const handleParcelChange = (event) => {
-        const { name, value } = event.target;
 
-        setParcelData((previousData) => ({
-            ...previousData,
-            [name]: value,
-        }));
+        const {
+            name,
+            value,
+        } =
+            event.target;
+
+        setParcelData(
+            (previousData) => ({
+                ...previousData,
+                [name]: value,
+            }),
+        );
     };
+
 
     const handleActivityChange = (event) => {
-        const { name, value } = event.target;
 
-        setActivityData((previousData) => ({
-            ...previousData,
-            [name]: value,
-        }));
+        const {
+            name,
+            value,
+        } =
+            event.target;
+
+        setActivityData(
+            (previousData) => ({
+                ...previousData,
+                [name]: value,
+            }),
+        );
     };
 
+
     const saveCrop = async (event) => {
+
         event.preventDefault();
 
-        if (!cropData.name.trim() || !cropData.type.trim() || !cropData.plantingDate) {
+        const name =
+            cropData.name.trim();
+
+        const type =
+            cropData.type.trim();
+
+        if (
+            !name
+            || !type
+            || !cropData.plantingDate
+        ) {
             setStatus({
-                message: "Please fill in all crop fields before saving.",
+                message:
+                    "Please fill in all crop fields before saving.",
                 type: "error",
             });
+
             return;
         }
 
         setIsSubmitting(true);
+
         setStatus({
-            message: "Saving crop data...",
+            message:
+                "Saving crop data...",
             type: "info",
         });
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/crops`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    name: cropData.name,
-                    type: cropData.type,
-                    plantingDate: cropData.plantingDate,
-                    user: {
-                        id: activeUserId,
+
+            const savedCrop =
+                await apiRequest(
+                    "/api/crops",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            name,
+                            type,
+                            plantingDate:
+                            cropData.plantingDate,
+                        }),
                     },
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Crop save request failed.");
-            }
-
-            const savedCrop = await response.json();
+                );
 
             setLastSavedRecord({
                 category: "Crop",
@@ -107,419 +164,802 @@ export default function DataEntryPage() {
                 id: savedCrop.id,
             });
 
-            setCropData(initialCropData);
+            setCropData(
+                initialCropData,
+            );
 
             setStatus({
-                message: "Crop data was saved successfully.",
+                message:
+                    "Crop data was saved successfully.",
                 type: "success",
             });
+
         } catch (error) {
-            console.error(error);
+
+            console.error(
+                "Could not save crop:",
+                error,
+            );
+
             setStatus({
-                message: `Could not save crop data. Make sure the backend is running and user with ID ${activeUserId} exists.`,
+                message:
+                    error.message
+                    || "Could not save crop data.",
                 type: "error",
             });
+
         } finally {
+
             setIsSubmitting(false);
         }
     };
 
+
     const saveParcel = async (event) => {
+
         event.preventDefault();
 
-        if (!parcelData.location.trim() || !parcelData.size || !parcelData.soilType.trim()) {
+        const location =
+            parcelData.location.trim();
+
+        const soilType =
+            parcelData.soilType.trim();
+
+        const size =
+            Number(parcelData.size);
+
+        if (
+            !location
+            || !parcelData.size
+            || !soilType
+        ) {
             setStatus({
-                message: "Please fill in all parcel fields before saving.",
+                message:
+                    "Please fill in all parcel fields before saving.",
                 type: "error",
             });
+
+            return;
+        }
+
+        if (
+            !Number.isFinite(size)
+            || size <= 0
+        ) {
+            setStatus({
+                message:
+                    "Parcel size must be greater than zero.",
+                type: "error",
+            });
+
             return;
         }
 
         setIsSubmitting(true);
+
         setStatus({
-            message: "Saving parcel data...",
+            message:
+                "Saving parcel data...",
             type: "info",
         });
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/parcels`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    location: parcelData.location,
-                    size: Number(parcelData.size),
-                    soilType: parcelData.soilType,
-                    user: {
-                        id: activeUserId,
+
+            const savedParcel =
+                await apiRequest(
+                    "/api/parcels",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            location,
+                            size,
+                            soilType,
+                        }),
                     },
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Parcel save request failed.");
-            }
-
-            const savedParcel = await response.json();
+                );
 
             setLastSavedRecord({
                 category: "Parcel",
-                title: savedParcel.location,
+                title:
+                savedParcel.location,
                 id: savedParcel.id,
             });
 
-            setParcelData(initialParcelData);
+            setParcelData(
+                initialParcelData,
+            );
 
             setStatus({
-                message: "Parcel data was saved successfully.",
+                message:
+                    "Parcel data was saved successfully.",
                 type: "success",
             });
+
         } catch (error) {
-            console.error(error);
+
+            console.error(
+                "Could not save parcel:",
+                error,
+            );
+
             setStatus({
-                message: `Could not save parcel data. Make sure the backend is running and user with ID ${activeUserId} exists.`,
+                message:
+                    error.message
+                    || "Could not save parcel data.",
                 type: "error",
             });
+
         } finally {
+
             setIsSubmitting(false);
         }
     };
 
+
     const saveActivity = async (event) => {
+
         event.preventDefault();
 
-        if (!activityData.description.trim() || !activityData.date || !activityData.type.trim()) {
+        const description =
+            activityData.description.trim();
+
+        const type =
+            activityData.type.trim();
+
+        if (
+            !description
+            || !activityData.date
+            || !type
+        ) {
             setStatus({
-                message: "Please fill in all activity fields before saving.",
+                message:
+                    "Please fill in all activity fields before saving.",
                 type: "error",
             });
+
             return;
         }
 
         setIsSubmitting(true);
+
         setStatus({
-            message: "Saving activity data...",
+            message:
+                "Saving activity data...",
             type: "info",
         });
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/activities`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    description: activityData.description,
-                    date: activityData.date,
-                    type: activityData.type,
-                    user: {
-                        id: activeUserId,
+
+            const savedActivity =
+                await apiRequest(
+                    "/api/activities",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            description,
+                            date:
+                            activityData.date,
+                            type,
+                        }),
                     },
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Activity save request failed.");
-            }
-
-            const savedActivity = await response.json();
+                );
 
             setLastSavedRecord({
                 category: "Activity",
-                title: savedActivity.description,
+                title:
+                savedActivity.description,
                 id: savedActivity.id,
             });
 
-            setActivityData(initialActivityData);
+            setActivityData(
+                initialActivityData,
+            );
 
             setStatus({
-                message: "Activity data was saved successfully.",
+                message:
+                    "Activity data was saved successfully.",
                 type: "success",
             });
+
         } catch (error) {
-            console.error(error);
+
+            console.error(
+                "Could not save activity:",
+                error,
+            );
+
             setStatus({
-                message: `Could not save activity data. Make sure the backend is running and user with ID ${activeUserId} exists.`,
+                message:
+                    error.message
+                    || "Could not save activity data.",
                 type: "error",
             });
+
         } finally {
+
             setIsSubmitting(false);
         }
     };
 
+
     const changeTab = (tabName) => {
-        setActiveTab(tabName);
+
+        if (isSubmitting) {
+            return;
+        }
+
+        setActiveTab(
+            tabName,
+        );
+
         setStatus({
             message: "",
             type: "",
         });
-        setLastSavedRecord(null);
+
+        setLastSavedRecord(
+            null,
+        );
     };
+
 
     return (
         <main className="page-shell">
+
             <section className="page-header-card">
-                <span className="section-label">Agricultural Data Entry</span>
-                <h1>Data Entry</h1>
+
+                <span className="section-label">
+                    Agricultural Data Entry
+                </span>
+
+                <h1>
+                    Data Entry
+                </h1>
+
                 <p>
-                    Enter and store agricultural records in the system. This page allows users
-                    to manage the main data categories used by the application: crops, parcels
-                    and field activities.
+                    Enter and store agricultural records in the
+                    system. Manage the main data categories used
+                    by the application: crops, parcels, and field
+                    activities.
                 </p>
+
             </section>
 
+
             <section className="data-entry-tabs">
+
                 <button
                     type="button"
-                    className={activeTab === "crop" ? "active" : ""}
-                    onClick={() => changeTab("crop")}
+                    className={
+                        activeTab === "crop"
+                            ? "active"
+                            : ""
+                    }
+                    disabled={isSubmitting}
+                    onClick={() =>
+                        changeTab("crop")
+                    }
                 >
                     Crop
                 </button>
 
                 <button
                     type="button"
-                    className={activeTab === "parcel" ? "active" : ""}
-                    onClick={() => changeTab("parcel")}
+                    className={
+                        activeTab === "parcel"
+                            ? "active"
+                            : ""
+                    }
+                    disabled={isSubmitting}
+                    onClick={() =>
+                        changeTab("parcel")
+                    }
                 >
                     Parcel
                 </button>
 
                 <button
                     type="button"
-                    className={activeTab === "activity" ? "active" : ""}
-                    onClick={() => changeTab("activity")}
+                    className={
+                        activeTab === "activity"
+                            ? "active"
+                            : ""
+                    }
+                    disabled={isSubmitting}
+                    onClick={() =>
+                        changeTab("activity")
+                    }
                 >
                     Activity
                 </button>
+
             </section>
 
+
             <section className="crop-form-layout">
+
                 {activeTab === "crop" && (
-                    <form className="crop-form-card" onSubmit={saveCrop}>
+
+                    <form
+                        className="crop-form-card"
+                        onSubmit={saveCrop}
+                    >
+
                         <div className="form-group">
-                            <label htmlFor="name">Crop name</label>
+
+                            <label htmlFor="name">
+                                Crop name
+                            </label>
+
                             <input
                                 id="name"
                                 name="name"
                                 type="text"
+                                maxLength={100}
                                 placeholder="Example: Wheat"
                                 value={cropData.name}
+                                disabled={isSubmitting}
                                 onChange={handleCropChange}
                             />
+
                         </div>
 
+
                         <div className="form-group">
-                            <label htmlFor="type">Crop type</label>
+
+                            <label htmlFor="type">
+                                Crop type
+                            </label>
+
                             <input
                                 id="type"
                                 name="type"
                                 type="text"
+                                maxLength={100}
                                 placeholder="Example: Grain"
                                 value={cropData.type}
+                                disabled={isSubmitting}
                                 onChange={handleCropChange}
                             />
+
                         </div>
 
+
                         <div className="form-group">
-                            <label htmlFor="plantingDate">Planting date</label>
+
+                            <label htmlFor="plantingDate">
+                                Planting date
+                            </label>
+
                             <input
                                 id="plantingDate"
                                 name="plantingDate"
                                 type="date"
-                                value={cropData.plantingDate}
+                                value={
+                                    cropData.plantingDate
+                                }
+                                disabled={isSubmitting}
                                 onChange={handleCropChange}
                             />
+
                         </div>
 
-                        <button className="primary-action-button" type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Saving..." : "Save Crop"}
+
+                        <button
+                            className="primary-action-button"
+                            type="submit"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting
+                                ? "Saving..."
+                                : "Save Crop"}
                         </button>
 
+
                         {status.message && (
-                            <div className={`form-alert ${status.type}`}>
+
+                            <div
+                                className={
+                                    `form-alert ${status.type}`
+                                }
+                            >
                                 {status.message}
                             </div>
+
                         )}
+
                     </form>
+
                 )}
 
+
                 {activeTab === "parcel" && (
-                    <form className="crop-form-card" onSubmit={saveParcel}>
+
+                    <form
+                        className="crop-form-card"
+                        onSubmit={saveParcel}
+                    >
+
                         <div className="form-group">
-                            <label htmlFor="location">Parcel location</label>
+
+                            <label htmlFor="location">
+                                Parcel location
+                            </label>
+
                             <input
                                 id="location"
                                 name="location"
                                 type="text"
+                                maxLength={200}
                                 placeholder="Example: North Field"
-                                value={parcelData.location}
+                                value={
+                                    parcelData.location
+                                }
+                                disabled={isSubmitting}
                                 onChange={handleParcelChange}
                             />
+
                         </div>
 
+
                         <div className="form-group">
-                            <label htmlFor="size">Parcel size</label>
+
+                            <label htmlFor="size">
+                                Parcel size
+                            </label>
+
                             <input
                                 id="size"
                                 name="size"
                                 type="number"
-                                step="0.1"
+                                min="0.01"
+                                step="0.01"
                                 placeholder="Example: 2.5"
                                 value={parcelData.size}
+                                disabled={isSubmitting}
                                 onChange={handleParcelChange}
                             />
+
                         </div>
 
+
                         <div className="form-group">
-                            <label htmlFor="soilType">Soil type</label>
+
+                            <label htmlFor="soilType">
+                                Soil type
+                            </label>
+
                             <input
                                 id="soilType"
                                 name="soilType"
                                 type="text"
+                                maxLength={100}
                                 placeholder="Example: Loamy"
-                                value={parcelData.soilType}
+                                value={
+                                    parcelData.soilType
+                                }
+                                disabled={isSubmitting}
                                 onChange={handleParcelChange}
                             />
+
                         </div>
 
-                        <button className="primary-action-button" type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Saving..." : "Save Parcel"}
+
+                        <button
+                            className="primary-action-button"
+                            type="submit"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting
+                                ? "Saving..."
+                                : "Save Parcel"}
                         </button>
 
+
                         {status.message && (
-                            <div className={`form-alert ${status.type}`}>
+
+                            <div
+                                className={
+                                    `form-alert ${status.type}`
+                                }
+                            >
                                 {status.message}
                             </div>
+
                         )}
+
                     </form>
+
                 )}
 
+
                 {activeTab === "activity" && (
-                    <form className="crop-form-card" onSubmit={saveActivity}>
+
+                    <form
+                        className="crop-form-card"
+                        onSubmit={saveActivity}
+                    >
+
                         <div className="form-group">
-                            <label htmlFor="description">Activity description</label>
+
+                            <label htmlFor="description">
+                                Activity description
+                            </label>
+
                             <input
                                 id="description"
                                 name="description"
                                 type="text"
+                                maxLength={255}
                                 placeholder="Example: Irrigation completed"
-                                value={activityData.description}
-                                onChange={handleActivityChange}
+                                value={
+                                    activityData.description
+                                }
+                                disabled={isSubmitting}
+                                onChange={
+                                    handleActivityChange
+                                }
                             />
+
                         </div>
 
+
                         <div className="form-group">
-                            <label htmlFor="date">Activity date</label>
+
+                            <label htmlFor="date">
+                                Activity date
+                            </label>
+
                             <input
                                 id="date"
                                 name="date"
                                 type="date"
-                                value={activityData.date}
-                                onChange={handleActivityChange}
+                                value={
+                                    activityData.date
+                                }
+                                disabled={isSubmitting}
+                                onChange={
+                                    handleActivityChange
+                                }
                             />
+
                         </div>
 
+
                         <div className="form-group">
-                            <label htmlFor="activityType">Activity type</label>
+
+                            <label htmlFor="activityType">
+                                Activity type
+                            </label>
+
                             <input
                                 id="activityType"
                                 name="type"
                                 type="text"
+                                maxLength={100}
                                 placeholder="Example: Irrigation"
-                                value={activityData.type}
-                                onChange={handleActivityChange}
+                                value={
+                                    activityData.type
+                                }
+                                disabled={isSubmitting}
+                                onChange={
+                                    handleActivityChange
+                                }
                             />
+
                         </div>
 
-                        <button className="primary-action-button" type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Saving..." : "Save Activity"}
+
+                        <button
+                            className="primary-action-button"
+                            type="submit"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting
+                                ? "Saving..."
+                                : "Save Activity"}
                         </button>
 
+
                         {status.message && (
-                            <div className={`form-alert ${status.type}`}>
+
+                            <div
+                                className={
+                                    `form-alert ${status.type}`
+                                }
+                            >
                                 {status.message}
                             </div>
+
                         )}
+
                     </form>
+
                 )}
 
+
                 <aside className="crop-preview-card">
-                    <span className="section-label">Current Input</span>
+
+                    <span className="section-label">
+                        Current Input
+                    </span>
+
 
                     {activeTab === "crop" && (
+
                         <>
-                            <h2>Crop Preview</h2>
+                            <h2>
+                                Crop Preview
+                            </h2>
+
                             <div className="preview-list">
+
                                 <div>
-                                    <span>Name</span>
-                                    <strong>{cropData.name || "Not entered"}</strong>
+                                    <span>
+                                        Name
+                                    </span>
+
+                                    <strong>
+                                        {cropData.name
+                                            || "Not entered"}
+                                    </strong>
                                 </div>
+
                                 <div>
-                                    <span>Type</span>
-                                    <strong>{cropData.type || "Not entered"}</strong>
+                                    <span>
+                                        Type
+                                    </span>
+
+                                    <strong>
+                                        {cropData.type
+                                            || "Not entered"}
+                                    </strong>
                                 </div>
+
                                 <div>
-                                    <span>Planting date</span>
-                                    <strong>{cropData.plantingDate || "Not selected"}</strong>
+                                    <span>
+                                        Planting date
+                                    </span>
+
+                                    <strong>
+                                        {cropData.plantingDate
+                                            || "Not selected"}
+                                    </strong>
                                 </div>
+
                             </div>
                         </>
+
                     )}
+
 
                     {activeTab === "parcel" && (
+
                         <>
-                            <h2>Parcel Preview</h2>
+                            <h2>
+                                Parcel Preview
+                            </h2>
+
                             <div className="preview-list">
+
                                 <div>
-                                    <span>Location</span>
-                                    <strong>{parcelData.location || "Not entered"}</strong>
+                                    <span>
+                                        Location
+                                    </span>
+
+                                    <strong>
+                                        {parcelData.location
+                                            || "Not entered"}
+                                    </strong>
                                 </div>
+
                                 <div>
-                                    <span>Size</span>
-                                    <strong>{parcelData.size ? `${parcelData.size} ha` : "Not entered"}</strong>
+                                    <span>
+                                        Size
+                                    </span>
+
+                                    <strong>
+                                        {parcelData.size
+                                            ? `${parcelData.size} ha`
+                                            : "Not entered"}
+                                    </strong>
                                 </div>
+
                                 <div>
-                                    <span>Soil type</span>
-                                    <strong>{parcelData.soilType || "Not entered"}</strong>
+                                    <span>
+                                        Soil type
+                                    </span>
+
+                                    <strong>
+                                        {parcelData.soilType
+                                            || "Not entered"}
+                                    </strong>
                                 </div>
+
                             </div>
                         </>
+
                     )}
+
 
                     {activeTab === "activity" && (
+
                         <>
-                            <h2>Activity Preview</h2>
+                            <h2>
+                                Activity Preview
+                            </h2>
+
                             <div className="preview-list">
+
                                 <div>
-                                    <span>Description</span>
-                                    <strong>{activityData.description || "Not entered"}</strong>
+                                    <span>
+                                        Description
+                                    </span>
+
+                                    <strong>
+                                        {activityData.description
+                                            || "Not entered"}
+                                    </strong>
                                 </div>
+
                                 <div>
-                                    <span>Date</span>
-                                    <strong>{activityData.date || "Not selected"}</strong>
+                                    <span>
+                                        Date
+                                    </span>
+
+                                    <strong>
+                                        {activityData.date
+                                            || "Not selected"}
+                                    </strong>
                                 </div>
+
                                 <div>
-                                    <span>Type</span>
-                                    <strong>{activityData.type || "Not entered"}</strong>
+                                    <span>
+                                        Type
+                                    </span>
+
+                                    <strong>
+                                        {activityData.type
+                                            || "Not entered"}
+                                    </strong>
                                 </div>
+
                             </div>
                         </>
+
                     )}
 
+
                     {lastSavedRecord && (
+
                         <div className="saved-crop-box">
-                            <span className="section-label">Last Saved Record</span>
+
+                            <span className="section-label">
+                                Last Saved Record
+                            </span>
+
                             <p>
-                                <strong>{lastSavedRecord.title}</strong> was saved as{" "}
-                                <strong>{lastSavedRecord.category}</strong> with ID{" "}
-                                <strong>{lastSavedRecord.id}</strong>.
+                                <strong>
+                                    {lastSavedRecord.title}
+                                </strong>
+                                {" "}was saved as{" "}
+                                <strong>
+                                    {lastSavedRecord.category}
+                                </strong>
+                                {" "}with ID{" "}
+                                <strong>
+                                    {lastSavedRecord.id}
+                                </strong>.
                             </p>
+
                         </div>
+
                     )}
+
                 </aside>
+
             </section>
+
         </main>
     );
 }

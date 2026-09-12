@@ -4,16 +4,14 @@ import lombok.RequiredArgsConstructor;
 import mk.ukim.team38.backend.dto.AuthResponse;
 import mk.ukim.team38.backend.dto.LoginRequest;
 import mk.ukim.team38.backend.dto.RegisterRequest;
+import mk.ukim.team38.backend.dto.UpdateProfileRequest;
+import mk.ukim.team38.backend.dto.UserProfileResponse;
+import mk.ukim.team38.backend.exception.ConflictException;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.UserRepository;
 import mk.ukim.team38.backend.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import mk.ukim.team38.backend.dto.UpdateProfileRequest;
-import mk.ukim.team38.backend.dto.UserProfileResponse;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,17 +21,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
-
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
-    }
-
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "User with this email already exists."
             );
         }
@@ -57,18 +47,16 @@ public class UserService {
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new IllegalArgumentException(
                                 "Invalid email or password."
                         )
                 );
 
-        if (
-                !passwordEncoder.matches(
-                        request.getPassword(),
-                        user.getPassword()
-                )
-        ) {
-            throw new RuntimeException(
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword()
+        )) {
+            throw new IllegalArgumentException(
                     "Invalid email or password."
             );
         }
@@ -76,74 +64,6 @@ public class UserService {
         return buildAuthResponse(
                 user,
                 "Login successful."
-        );
-    }
-
-    public User save(User user) {
-        if (
-                user.getRole() == null
-                        || user.getRole().isBlank()
-        ) {
-            user.setRole("USER");
-        }
-
-        if (
-                user.getPassword() != null
-                        && !user.getPassword().startsWith("$2")
-        ) {
-            user.setPassword(
-                    passwordEncoder.encode(user.getPassword())
-            );
-        }
-
-        return userRepository.save(user);
-    }
-
-    public User update(
-            Long id,
-            User userDetails
-    ) {
-        User user = userRepository.findById(id)
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                "User not found with id: " + id
-                        )
-                );
-
-        user.setFullName(userDetails.getFullName());
-        user.setEmail(userDetails.getEmail());
-
-        if (
-                userDetails.getPassword() != null
-                        && !userDetails.getPassword().isBlank()
-        ) {
-            user.setPassword(
-                    passwordEncoder.encode(
-                            userDetails.getPassword()
-                    )
-            );
-        }
-
-        return userRepository.save(user);
-    }
-
-    public void deleteById(Long id) {
-        userRepository.deleteById(id);
-    }
-
-    private AuthResponse buildAuthResponse(
-            User user,
-            String message
-    ) {
-        String token = jwtService.generateToken(user);
-
-        return new AuthResponse(
-                user.getId(),
-                user.getFullName(),
-                user.getEmail(),
-                user.getRole(),
-                token,
-                message
         );
     }
 
@@ -164,7 +84,7 @@ public class UserService {
                 !user.getEmail().equalsIgnoreCase(request.getEmail())
                         && userRepository.existsByEmail(request.getEmail())
         ) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "User with this email already exists."
             );
         }
@@ -186,6 +106,22 @@ public class UserService {
         return buildAuthResponse(
                 savedUser,
                 "Profile updated successfully."
+        );
+    }
+
+    private AuthResponse buildAuthResponse(
+            User user,
+            String message
+    ) {
+        String token = jwtService.generateToken(user);
+
+        return new AuthResponse(
+                user.getId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getRole(),
+                token,
+                message
         );
     }
 }

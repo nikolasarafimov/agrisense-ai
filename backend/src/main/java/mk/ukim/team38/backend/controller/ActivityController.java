@@ -2,8 +2,12 @@ package mk.ukim.team38.backend.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import mk.ukim.team38.backend.dto.ActivityRequest;
+import mk.ukim.team38.backend.dto.ActivityResponse;
+import mk.ukim.team38.backend.exception.ResourceNotFoundException;
 import mk.ukim.team38.backend.model.Activity;
 import mk.ukim.team38.backend.service.ActivityService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,36 +21,97 @@ public class ActivityController {
     private final ActivityService activityService;
 
     @GetMapping
-    public List<Activity> getAllActivities(
+    public List<ActivityResponse> getAllActivities(
             @RequestParam(required = false) String search
     ) {
-        return activityService.findAll(search);
+        return activityService.findAll(search)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Activity> getActivityById(@PathVariable Long id) {
-        return activityService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ActivityResponse getActivityById(
+            @PathVariable Long id
+    ) {
+        Activity activity =
+                activityService.findById(id)
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException(
+                                        "Activity not found with id: " + id
+                                )
+                        );
+
+        return toResponse(activity);
     }
 
     @PostMapping
-    public Activity createActivity(@Valid @RequestBody Activity activity) {
-        return activityService.save(activity);
+    public ResponseEntity<ActivityResponse> createActivity(
+            @Valid @RequestBody ActivityRequest request
+    ) {
+        Activity activity = new Activity();
+
+        activity.setDescription(
+                request.description()
+        );
+        activity.setDate(
+                request.date().toString()
+        );
+        activity.setType(
+                request.type()
+        );
+
+        Activity savedActivity =
+                activityService.save(activity);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(toResponse(savedActivity));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Activity> updateActivity(@PathVariable Long id, @Valid @RequestBody Activity activityDetails) {
-        try {
-            return ResponseEntity.ok(activityService.update(id, activityDetails));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ActivityResponse updateActivity(
+            @PathVariable Long id,
+            @Valid @RequestBody ActivityRequest request
+    ) {
+        Activity activityDetails =
+                new Activity();
+
+        activityDetails.setDescription(
+                request.description()
+        );
+        activityDetails.setDate(
+                request.date().toString()
+        );
+        activityDetails.setType(
+                request.type()
+        );
+
+        return toResponse(
+                activityService.update(
+                        id,
+                        activityDetails
+                )
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteActivity(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteActivity(
+            @PathVariable Long id
+    ) {
         activityService.deleteById(id);
+
         return ResponseEntity.noContent().build();
+    }
+
+    private ActivityResponse toResponse(
+            Activity activity
+    ) {
+        return new ActivityResponse(
+                activity.getId(),
+                activity.getDescription(),
+                activity.getDate(),
+                activity.getType()
+        );
     }
 }

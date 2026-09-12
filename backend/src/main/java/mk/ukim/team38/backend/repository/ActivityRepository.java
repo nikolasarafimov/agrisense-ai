@@ -13,6 +13,8 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     List<Activity> findByUser(User user);
 
+    long countByUser(User user);
+
     List<Activity> findByUserAndDescriptionContainingIgnoreCaseOrUserAndTypeContainingIgnoreCase(
             User user1,
             String description,

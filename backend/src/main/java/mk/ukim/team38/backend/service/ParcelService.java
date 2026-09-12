@@ -1,6 +1,7 @@
 package mk.ukim.team38.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import mk.ukim.team38.backend.exception.ResourceNotFoundException;
 import mk.ukim.team38.backend.model.Parcel;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.ParcelRepository;
@@ -51,9 +52,10 @@ public class ParcelService {
     public Parcel update(Long id, Parcel parcelDetails) {
         User user = authenticatedUserService.getCurrentUser();
 
-        Parcel parcel = parcelRepository.findByIdAndUser(id, user)
+        Parcel parcel = parcelRepository
+                .findByIdAndUser(id, user)
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new ResourceNotFoundException(
                                 "Parcel not found with id: " + id
                         )
                 );
@@ -68,9 +70,10 @@ public class ParcelService {
     public void deleteById(Long id) {
         User user = authenticatedUserService.getCurrentUser();
 
-        Parcel parcel = parcelRepository.findByIdAndUser(id, user)
+        Parcel parcel = parcelRepository
+                .findByIdAndUser(id, user)
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new ResourceNotFoundException(
                                 "Parcel not found with id: " + id
                         )
                 );

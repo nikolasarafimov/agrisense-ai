@@ -1,6 +1,7 @@
 package mk.ukim.team38.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import mk.ukim.team38.backend.exception.ResourceNotFoundException;
 import mk.ukim.team38.backend.model.Crop;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.CropRepository;
@@ -51,9 +52,10 @@ public class CropService {
     public Crop update(Long id, Crop cropDetails) {
         User user = authenticatedUserService.getCurrentUser();
 
-        Crop crop = cropRepository.findByIdAndUser(id, user)
+        Crop crop = cropRepository
+                .findByIdAndUser(id, user)
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new ResourceNotFoundException(
                                 "Crop not found with id: " + id
                         )
                 );
@@ -68,9 +70,10 @@ public class CropService {
     public void deleteById(Long id) {
         User user = authenticatedUserService.getCurrentUser();
 
-        Crop crop = cropRepository.findByIdAndUser(id, user)
+        Crop crop = cropRepository
+                .findByIdAndUser(id, user)
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new ResourceNotFoundException(
                                 "Crop not found with id: " + id
                         )
                 );

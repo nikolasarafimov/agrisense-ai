@@ -49,6 +49,7 @@ services:
       ML_SERVICE_URL: ${ML_SERVICE_URL}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     ports:
       - "8080:8080"
     networks:
