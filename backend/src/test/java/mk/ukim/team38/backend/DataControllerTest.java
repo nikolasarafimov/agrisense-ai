@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import mk.ukim.team38.backend.model.User;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,13 @@ class DataControllerTest {
 
     @Test
     void testExportCrops() throws Exception {
-        User user = new User(1L, "John", "john@example.com", "pass");
+        User user = new User(
+                1L,
+                "John",
+                "john@example.com",
+                "pass",
+                "USER"
+        );
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(exportService.exportCropsCsv(user))
@@ -47,14 +54,25 @@ class DataControllerTest {
 
         mockMvc.perform(get("/api/data/export/crops").param("userId", "1"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", "attachment; filename=crops.csv"))
+                .andExpect(
+                        header().string(
+                                "Content-Disposition",
+                                "attachment; filename=\"crops.csv\""
+                        )
+                )
                 .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
                 .andExpect(content().string("id,name,type,plantingDate\n1,Wheat,Grain,2024-01-01\n"));
     }
 
     @Test
     void testImportCrops() throws Exception {
-        User user = new User(1L, "John", "john@example.com", "pass");
+        User user = new User(
+                1L,
+                "John",
+                "john@example.com",
+                "pass",
+                "USER"
+        );
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 

@@ -4,6 +4,7 @@ import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.UserRepository;
 import mk.ukim.team38.backend.service.ExportService;
 import mk.ukim.team38.backend.service.ImportService;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -114,8 +115,18 @@ public class DataController {
 
     private HttpHeaders csvHeaders(String filename) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
-        headers.setContentDispositionFormData("attachment", filename);
+
+        headers.setContentType(
+                MediaType.parseMediaType("text/csv; charset=UTF-8")
+        );
+
+        headers.setContentDisposition(
+                ContentDisposition
+                        .attachment()
+                        .filename(filename)
+                        .build()
+        );
+
         return headers;
     }
 }
