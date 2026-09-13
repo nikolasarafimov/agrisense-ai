@@ -53,7 +53,7 @@ All operations are **user-specific** - each user can only access and modify thei
 | `/api/data/export/excel` | GET | Export all data to Excel |
 
 **Parameters:**
-- `userId` (required): The ID of the authenticated user
+The authenticated user is determined from the JWT token. No `userId` request parameter is required.
 
 **Response:**
 - Content-Type: `text/csv` or `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
