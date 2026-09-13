@@ -113,17 +113,7 @@ public class ImportService {
                         );
                     }
 
-                    if (crop.getName().isBlank()) {
-                        throw new IllegalArgumentException(
-                                "Crop name is required."
-                        );
-                    }
-
-                    if (crop.getType().isBlank()) {
-                        throw new IllegalArgumentException(
-                                "Crop type is required."
-                        );
-                    }
+                    validateCrop(crop);
 
                     crop.setUser(user);
 
@@ -137,7 +127,7 @@ public class ImportService {
                             "Line "
                                     + lineNumber
                                     + ": "
-                                    + e.getMessage()
+                                    + errorMessage(e)
                     );
                 }
             }
@@ -184,7 +174,7 @@ public class ImportService {
                 }
 
                 try {
-                    if (row.length < 2) {
+                    if (row.length < 3) {
                         throw new IllegalArgumentException(
                                 "Not enough columns."
                         );
@@ -198,8 +188,9 @@ public class ImportService {
                         );
 
                         parcel.setSize(
-                                parseDoubleOrNull(
-                                        row[2]
+                                parseRequiredPositiveDouble(
+                                        row[2],
+                                        "Parcel size"
                                 )
                         );
 
@@ -212,25 +203,18 @@ public class ImportService {
                         );
 
                         parcel.setSize(
-                                row.length > 1
-                                        ? parseDoubleOrNull(
-                                        row[1]
+                                parseRequiredPositiveDouble(
+                                        row[1],
+                                        "Parcel size"
                                 )
-                                        : null
                         );
 
                         parcel.setSoilType(
-                                row.length > 2
-                                        ? clean(row[2])
-                                        : ""
+                                clean(row[2])
                         );
                     }
 
-                    if (parcel.getLocation().isBlank()) {
-                        throw new IllegalArgumentException(
-                                "Parcel location is required."
-                        );
-                    }
+                    validateParcel(parcel);
 
                     parcel.setUser(user);
 
@@ -244,7 +228,7 @@ public class ImportService {
                             "Line "
                                     + lineNumber
                                     + ": "
-                                    + e.getMessage()
+                                    + errorMessage(e)
                     );
                 }
             }
@@ -297,8 +281,7 @@ public class ImportService {
                         );
                     }
 
-                    Activity activity =
-                            new Activity();
+                    Activity activity = new Activity();
 
                     if (row.length >= 4) {
                         activity.setDescription(
@@ -332,28 +315,11 @@ public class ImportService {
                         );
                     }
 
-                    if (
-                            activity
-                                    .getDescription()
-                                    .isBlank()
-                    ) {
-                        throw new IllegalArgumentException(
-                                "Activity description is required."
-                        );
-                    }
-
-                    if (activity.getType().isBlank()) {
-                        throw new IllegalArgumentException(
-                                "Activity type is required."
-                        );
-                    }
+                    validateActivity(activity);
 
                     activity.setUser(user);
 
-                    activityRepository.save(
-                            activity
-                    );
-
+                    activityRepository.save(activity);
                     imported++;
 
                 } catch (Exception e) {
@@ -363,7 +329,7 @@ public class ImportService {
                             "Line "
                                     + lineNumber
                                     + ": "
-                                    + e.getMessage()
+                                    + errorMessage(e)
                     );
                 }
             }
@@ -414,8 +380,7 @@ public class ImportService {
                     }
 
                     try {
-                        Crop crop =
-                                new Crop();
+                        Crop crop = new Crop();
 
                         crop.setName(
                                 getCellValue(
@@ -439,25 +404,9 @@ public class ImportService {
                                 )
                         );
 
+                        validateCrop(crop);
+
                         crop.setUser(user);
-
-                        if (
-                                crop.getName()
-                                        .isBlank()
-                        ) {
-                            throw new IllegalArgumentException(
-                                    "Crop name is required."
-                            );
-                        }
-
-                        if (
-                                crop.getType()
-                                        .isBlank()
-                        ) {
-                            throw new IllegalArgumentException(
-                                    "Crop type is required."
-                            );
-                        }
 
                         cropRepository.save(crop);
                         imported++;
@@ -469,16 +418,14 @@ public class ImportService {
                                 "Crops row "
                                         + (i + 1)
                                         + ": "
-                                        + e.getMessage()
+                                        + errorMessage(e)
                         );
                     }
                 }
             }
 
             Sheet parcelsSheet =
-                    workbook.getSheet(
-                            "Parcels"
-                    );
+                    workbook.getSheet("Parcels");
 
             if (parcelsSheet != null) {
                 for (
@@ -494,8 +441,7 @@ public class ImportService {
                     }
 
                     try {
-                        Parcel parcel =
-                                new Parcel();
+                        Parcel parcel = new Parcel();
 
                         parcel.setLocation(
                                 getCellValue(
@@ -505,11 +451,12 @@ public class ImportService {
                         );
 
                         parcel.setSize(
-                                parseDoubleOrNull(
+                                parseRequiredPositiveDouble(
                                         getCellValue(
                                                 row,
                                                 2
-                                        )
+                                        ),
+                                        "Parcel size"
                                 )
                         );
 
@@ -520,21 +467,11 @@ public class ImportService {
                                 )
                         );
 
+                        validateParcel(parcel);
+
                         parcel.setUser(user);
 
-                        if (
-                                parcel.getLocation()
-                                        .isBlank()
-                        ) {
-                            throw new IllegalArgumentException(
-                                    "Parcel location is required."
-                            );
-                        }
-
-                        parcelRepository.save(
-                                parcel
-                        );
-
+                        parcelRepository.save(parcel);
                         imported++;
 
                     } catch (Exception e) {
@@ -544,16 +481,14 @@ public class ImportService {
                                 "Parcels row "
                                         + (i + 1)
                                         + ": "
-                                        + e.getMessage()
+                                        + errorMessage(e)
                         );
                     }
                 }
             }
 
             Sheet activitiesSheet =
-                    workbook.getSheet(
-                            "Activities"
-                    );
+                    workbook.getSheet("Activities");
 
             if (activitiesSheet != null) {
                 for (
@@ -594,32 +529,11 @@ public class ImportService {
                                 )
                         );
 
+                        validateActivity(activity);
+
                         activity.setUser(user);
 
-                        if (
-                                activity
-                                        .getDescription()
-                                        .isBlank()
-                        ) {
-                            throw new IllegalArgumentException(
-                                    "Activity description is required."
-                            );
-                        }
-
-                        if (
-                                activity
-                                        .getType()
-                                        .isBlank()
-                        ) {
-                            throw new IllegalArgumentException(
-                                    "Activity type is required."
-                            );
-                        }
-
-                        activityRepository.save(
-                                activity
-                        );
-
+                        activityRepository.save(activity);
                         imported++;
 
                     } catch (Exception e) {
@@ -629,7 +543,7 @@ public class ImportService {
                                 "Activities row "
                                         + (i + 1)
                                         + ": "
-                                        + e.getMessage()
+                                        + errorMessage(e)
                         );
                     }
                 }
@@ -641,6 +555,102 @@ public class ImportService {
                 "skipped", skipped,
                 "errors", errors
         );
+    }
+
+    private void validateCrop(
+            Crop crop
+    ) {
+        requireText(
+                crop.getName(),
+                "Crop name",
+                100
+        );
+
+        requireText(
+                crop.getType(),
+                "Crop type",
+                100
+        );
+
+        if (crop.getPlantingDate() == null) {
+            throw new IllegalArgumentException(
+                    "Planting date is required."
+            );
+        }
+    }
+
+    private void validateParcel(
+            Parcel parcel
+    ) {
+        requireText(
+                parcel.getLocation(),
+                "Parcel location",
+                200
+        );
+
+        if (parcel.getSize() == null) {
+            throw new IllegalArgumentException(
+                    "Parcel size is required."
+            );
+        }
+
+        if (parcel.getSize() <= 0) {
+            throw new IllegalArgumentException(
+                    "Parcel size must be greater than zero."
+            );
+        }
+
+        requireText(
+                parcel.getSoilType(),
+                "Soil type",
+                100
+        );
+    }
+
+    private void validateActivity(
+            Activity activity
+    ) {
+        requireText(
+                activity.getDescription(),
+                "Activity description",
+                255
+        );
+
+        if (activity.getDate() == null) {
+            throw new IllegalArgumentException(
+                    "Activity date is required."
+            );
+        }
+
+        requireText(
+                activity.getType(),
+                "Activity type",
+                100
+        );
+    }
+
+    private void requireText(
+            String value,
+            String fieldName,
+            int maxLength
+    ) {
+        if (
+                value == null
+                        || value.isBlank()
+        ) {
+            throw new IllegalArgumentException(
+                    fieldName + " is required."
+            );
+        }
+
+        if (value.length() > maxLength) {
+            throw new IllegalArgumentException(
+                    fieldName
+                            + " must not exceed "
+                            + maxLength
+                            + " characters."
+            );
+        }
     }
 
     private LocalDate getRequiredDateCellValue(
@@ -670,7 +680,10 @@ public class ImportService {
         }
 
         return parseRequiredDate(
-                getCellValue(row, index),
+                getCellValue(
+                        row,
+                        index
+                ),
                 fieldName
         );
     }
@@ -689,15 +702,53 @@ public class ImportService {
         }
 
         try {
-            return LocalDate.parse(
-                    cleaned
-            );
+            return LocalDate.parse(cleaned);
+
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
                     fieldName
                             + " must use yyyy-MM-dd format."
             );
         }
+    }
+
+    private Double parseRequiredPositiveDouble(
+            String value,
+            String fieldName
+    ) {
+        String cleaned =
+                clean(value);
+
+        if (cleaned.isBlank()) {
+            throw new IllegalArgumentException(
+                    fieldName + " is required."
+            );
+        }
+
+        final double parsedValue;
+
+        try {
+            parsedValue =
+                    Double.parseDouble(cleaned);
+
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    fieldName
+                            + " must be a valid number."
+            );
+        }
+
+        if (
+                !Double.isFinite(parsedValue)
+                        || parsedValue <= 0
+        ) {
+            throw new IllegalArgumentException(
+                    fieldName
+                            + " must be greater than zero."
+            );
+        }
+
+        return parsedValue;
     }
 
     private String getCellValue(
@@ -711,9 +762,7 @@ public class ImportService {
             return "";
         }
 
-        return switch (
-                cell.getCellType()
-                ) {
+        return switch (cell.getCellType()) {
             case STRING ->
                     cell.getStringCellValue()
                             .trim();
@@ -724,18 +773,14 @@ public class ImportService {
 
                 if (
                         value
-                                == Math.floor(
-                                value
-                        )
+                                == Math.floor(value)
                 ) {
                     yield String.valueOf(
                             (long) value
                     );
                 }
 
-                yield String.valueOf(
-                        value
-                );
+                yield String.valueOf(value);
             }
 
             case BOOLEAN ->
@@ -758,18 +803,15 @@ public class ImportService {
                 : value.trim();
     }
 
-    private Double parseDoubleOrNull(
-            String value
+    private String errorMessage(
+            Exception exception
     ) {
-        if (
-                value == null
-                        || value.trim().isEmpty()
-        ) {
-            return null;
-        }
+        String message =
+                exception.getMessage();
 
-        return Double.parseDouble(
-                value.trim()
-        );
+        return message == null
+                || message.isBlank()
+                ? "Invalid data."
+                : message;
     }
 }

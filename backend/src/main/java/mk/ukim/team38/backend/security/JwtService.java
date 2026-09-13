@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Function;
 
 @Service
@@ -23,7 +24,8 @@ public class JwtService {
 
     public String generateToken(User user) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + expirationMs);
+        Date expiration =
+                new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .subject(user.getEmail())
@@ -36,22 +38,42 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(
+                token,
+                Claims::getSubject
+        );
     }
 
-    public boolean isTokenValid(String token, String username) {
-        String tokenUsername = extractUsername(token);
+    public boolean isTokenValid(
+            String token,
+            String username
+    ) {
+        String tokenUsername =
+                extractUsername(token);
 
-        return tokenUsername.equals(username)
-                && !isTokenExpired(token);
+        return Objects.equals(
+                tokenUsername,
+                username
+        ) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    private boolean isTokenExpired(
+            String token
+    ) {
+        Date expiration =
+                extractExpiration(token);
+
+        return expiration == null
+                || expiration.before(new Date());
     }
 
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    private Date extractExpiration(
+            String token
+    ) {
+        return extractClaim(
+                token,
+                Claims::getExpiration
+        );
     }
 
     private <T> T extractClaim(
@@ -68,7 +90,9 @@ public class JwtService {
     }
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        byte[] keyBytes =
+                Decoders.BASE64.decode(secret);
+
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

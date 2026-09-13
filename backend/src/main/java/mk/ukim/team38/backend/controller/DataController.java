@@ -114,7 +114,7 @@ public class DataController {
         headers.setContentDisposition(
                 ContentDisposition
                         .attachment()
-                        .filename("agriculture_data.xlsx")
+                        .filename("agriculture-data.xlsx")
                         .build()
         );
 

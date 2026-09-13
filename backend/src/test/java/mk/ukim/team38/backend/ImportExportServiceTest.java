@@ -2,6 +2,7 @@ package mk.ukim.team38.backend;
 
 import mk.ukim.team38.backend.model.Activity;
 import mk.ukim.team38.backend.model.Crop;
+import mk.ukim.team38.backend.model.Parcel;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.ActivityRepository;
 import mk.ukim.team38.backend.repository.CropRepository;
@@ -80,7 +81,9 @@ class ImportExportServiceTest {
                         "file",
                         "crops.csv",
                         "text/csv",
-                        csv.getBytes(StandardCharsets.UTF_8)
+                        csv.getBytes(
+                                StandardCharsets.UTF_8
+                        )
                 );
 
         Map<String, Object> result =
@@ -147,7 +150,9 @@ class ImportExportServiceTest {
                         "file",
                         "crops.csv",
                         "text/csv",
-                        csv.getBytes(StandardCharsets.UTF_8)
+                        csv.getBytes(
+                                StandardCharsets.UTF_8
+                        )
                 );
 
         Map<String, Object> result =
@@ -193,6 +198,130 @@ class ImportExportServiceTest {
     }
 
     @Test
+    void importParcelsCsvShouldParseValidParcel() throws Exception {
+        String csv = """
+                id,location,size,soilType
+                1,North Field,2.5,Loam
+                """;
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "parcels.csv",
+                        "text/csv",
+                        csv.getBytes(
+                                StandardCharsets.UTF_8
+                        )
+                );
+
+        Map<String, Object> result =
+                importService.importParcelsCsv(
+                        file,
+                        user
+                );
+
+        assertEquals(
+                1,
+                result.get("imported")
+        );
+
+        assertEquals(
+                0,
+                result.get("skipped")
+        );
+
+        ArgumentCaptor<Parcel> captor =
+                ArgumentCaptor.forClass(
+                        Parcel.class
+                );
+
+        verify(parcelRepository)
+                .save(captor.capture());
+
+        Parcel savedParcel =
+                captor.getValue();
+
+        assertEquals(
+                "North Field",
+                savedParcel.getLocation()
+        );
+
+        assertEquals(
+                2.5,
+                savedParcel.getSize()
+        );
+
+        assertEquals(
+                "Loam",
+                savedParcel.getSoilType()
+        );
+
+        assertEquals(
+                user,
+                savedParcel.getUser()
+        );
+    }
+
+    @Test
+    void importParcelsCsvShouldRejectNonPositiveSize() throws Exception {
+        String csv = """
+                id,location,size,soilType
+                1,North Field,0,Loam
+                """;
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "parcels.csv",
+                        "text/csv",
+                        csv.getBytes(
+                                StandardCharsets.UTF_8
+                        )
+                );
+
+        Map<String, Object> result =
+                importService.importParcelsCsv(
+                        file,
+                        user
+                );
+
+        assertEquals(
+                0,
+                result.get("imported")
+        );
+
+        assertEquals(
+                1,
+                result.get("skipped")
+        );
+
+        @SuppressWarnings("unchecked")
+        List<String> errors =
+                (List<String>) result.get(
+                        "errors"
+                );
+
+        assertEquals(
+                1,
+                errors.size()
+        );
+
+        assertTrue(
+                errors.getFirst()
+                        .contains(
+                                "Parcel size must be greater than zero."
+                        )
+        );
+
+        verify(
+                parcelRepository,
+                never()
+        ).save(
+                any(Parcel.class)
+        );
+    }
+
+    @Test
     void importActivitiesCsvShouldParseValidLocalDate() throws Exception {
         String csv = """
                 id,description,date,type
@@ -204,7 +333,9 @@ class ImportExportServiceTest {
                         "file",
                         "activities.csv",
                         "text/csv",
-                        csv.getBytes(StandardCharsets.UTF_8)
+                        csv.getBytes(
+                                StandardCharsets.UTF_8
+                        )
                 );
 
         Map<String, Object> result =
@@ -271,7 +402,9 @@ class ImportExportServiceTest {
                         "file",
                         "activities.csv",
                         "text/csv",
-                        csv.getBytes(StandardCharsets.UTF_8)
+                        csv.getBytes(
+                                StandardCharsets.UTF_8
+                        )
                 );
 
         Map<String, Object> result =
@@ -324,6 +457,7 @@ class ImportExportServiceTest {
         crop.setId(1L);
         crop.setName("Wheat");
         crop.setType("Grain");
+
         crop.setPlantingDate(
                 LocalDate.of(
                         2026,
@@ -331,6 +465,7 @@ class ImportExportServiceTest {
                         12
                 )
         );
+
         crop.setUser(user);
 
         when(
@@ -356,14 +491,58 @@ class ImportExportServiceTest {
     }
 
     @Test
+    void exportParcelsCsvShouldExportParcelData() {
+        Parcel parcel =
+                new Parcel();
+
+        parcel.setId(1L);
+        parcel.setLocation(
+                "North Field"
+        );
+
+        parcel.setSize(
+                2.5
+        );
+
+        parcel.setSoilType(
+                "Loam"
+        );
+
+        parcel.setUser(user);
+
+        when(
+                parcelRepository.findByUser(
+                        user
+                )
+        ).thenReturn(
+                List.of(parcel)
+        );
+
+        String csv =
+                exportService.exportParcelsCsv(
+                        user
+                );
+
+        assertEquals(
+                """
+                id,location,size,soilType
+                1,North Field,2.5,Loam
+                """,
+                csv
+        );
+    }
+
+    @Test
     void exportActivitiesCsvShouldFormatLocalDateAsIsoDate() {
         Activity activity =
                 new Activity();
 
         activity.setId(1L);
+
         activity.setDescription(
                 "Irrigation completed"
         );
+
         activity.setDate(
                 LocalDate.of(
                         2026,
@@ -371,9 +550,11 @@ class ImportExportServiceTest {
                         12
                 )
         );
+
         activity.setType(
                 "Irrigation"
         );
+
         activity.setUser(user);
 
         when(

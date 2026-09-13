@@ -10,6 +10,7 @@ import mk.ukim.team38.backend.dto.UserProfileResponse;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.security.AuthenticatedUserService;
 import mk.ukim.team38.backend.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,9 +31,11 @@ public class UserController {
     public ResponseEntity<AuthResponse> register(
             @Valid @RequestBody RegisterRequest request
     ) {
-        return ResponseEntity.ok(
-                userService.register(request)
-        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        userService.register(request)
+                );
     }
 
     @PostMapping("/login")

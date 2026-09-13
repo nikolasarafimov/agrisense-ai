@@ -3,81 +3,96 @@ function HomePage() {
         <>
             <section className="card status-card">
                 <div>
-                    <h2>Project Overview</h2>
+                    <h2>AgriSense AI</h2>
+
                     <p>
-                        The Intelligent Agriculture System is a web application for
-                        managing crop, parcel and agricultural activity data. The system combines a
-                        Spring Boot backend, PostgreSQL database, React frontend, CSV/Excel
-                        import-export functionality and an AI/ML recommendation module.
+                        AgriSense AI is a web application for managing agricultural
+                        data, monitoring weather conditions, and generating intelligent
+                        irrigation recommendations. The system combines a React frontend,
+                        Spring Boot backend, PostgreSQL database, CSV/Excel import and
+                        export, Open-Meteo weather data, and a FastAPI machine learning
+                        service.
                     </p>
                 </div>
 
                 <div className="status-list">
                     <div className="status-item">
                         <span className="status-dot"></span>
-                        Backend service running
+                        Spring Boot backend
                     </div>
+
                     <div className="status-item">
                         <span className="status-dot"></span>
-                        PostgreSQL database connected
+                        PostgreSQL database
                     </div>
+
                     <div className="status-item">
                         <span className="status-dot"></span>
-                        Frontend interface available
+                        React frontend
                     </div>
+
                     <div className="status-item">
                         <span className="status-dot"></span>
-                        ML module prepared for recommendations
+                        FastAPI ML recommendation service
                     </div>
                 </div>
             </section>
 
             <section className="home-grid">
                 <article className="feature-card">
-                    <h3>Crop Management</h3>
+                    <h3>Agricultural Data Management</h3>
+
                     <p>
-                        Record and manage crop information such as crop name, type and planting
-                        date through the application interface.
+                        Create, update, search, and manage crop, parcel, and field
+                        activity records associated with your account.
                     </p>
                 </article>
 
                 <article className="feature-card">
-                    <h3>Soil & Field Analysis</h3>
+                    <h3>Weather Monitoring</h3>
+
                     <p>
-                        Monitor soil moisture, pH, rainfall, temperature and other indicators from
-                        the agricultural dataset.
+                        Retrieve current weather conditions and daily forecasts using
+                        geographic coordinates through the Open-Meteo integration.
                     </p>
                 </article>
 
                 <article className="feature-card">
-                    <h3>AI Recommendations</h3>
+                    <h3>AI Irrigation Recommendations</h3>
+
                     <p>
-                        Use machine learning logic and rule-based analysis to support irrigation
-                        and agricultural decision-making.
+                        Submit soil, crop, and environmental conditions to the machine
+                        learning service and receive irrigation recommendations based
+                        on the predicted water requirement.
                     </p>
                 </article>
 
                 <article className="feature-card">
                     <h3>Dashboard</h3>
+
                     <p>
-                        View agricultural metrics, filters and visual indicators in a centralized
-                        dashboard designed for project demonstration.
+                        View agricultural statistics, search stored records, and manage
+                        crops, parcels, and activities from one centralized dashboard.
                     </p>
                 </article>
 
                 <article className="feature-card">
                     <h3>Import / Export</h3>
+
                     <p>
-                        Export crop, parcel and activity data to CSV or Excel and import existing
-                        records into the system.
+                        Import agricultural records from CSV or Excel files and export
+                        user-specific crops, parcels, and activities for portability
+                        and backup.
                     </p>
                 </article>
 
                 <article className="feature-card">
-                    <h3>External Data Support</h3>
+                    <h3>Secure User Accounts</h3>
+
                     <p>
-                        The project structure is prepared for future integration with external
-                        APIs such as weather services.
+                        Access user-specific agricultural data through JWT-based
+                        authentication, protected routes, and role-based administrative
+                        functionality.
                     </p>
                 </article>
             </section>

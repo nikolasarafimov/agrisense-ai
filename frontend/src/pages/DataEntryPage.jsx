@@ -27,7 +27,6 @@ const initialActivityData = {
 
 
 export default function DataEntryPage() {
-
     const [activeTab, setActiveTab] =
         useState("crop");
 
@@ -49,23 +48,19 @@ export default function DataEntryPage() {
     const [
         lastSavedRecord,
         setLastSavedRecord,
-    ] =
-        useState(null);
+    ] = useState(null);
 
     const [
         isSubmitting,
         setIsSubmitting,
-    ] =
-        useState(false);
+    ] = useState(false);
 
 
     const handleCropChange = (event) => {
-
         const {
             name,
             value,
-        } =
-            event.target;
+        } = event.target;
 
         setCropData(
             (previousData) => ({
@@ -77,12 +72,10 @@ export default function DataEntryPage() {
 
 
     const handleParcelChange = (event) => {
-
         const {
             name,
             value,
-        } =
-            event.target;
+        } = event.target;
 
         setParcelData(
             (previousData) => ({
@@ -94,12 +87,10 @@ export default function DataEntryPage() {
 
 
     const handleActivityChange = (event) => {
-
         const {
             name,
             value,
-        } =
-            event.target;
+        } = event.target;
 
         setActivityData(
             (previousData) => ({
@@ -111,7 +102,6 @@ export default function DataEntryPage() {
 
 
     const saveCrop = async (event) => {
-
         event.preventDefault();
 
         const name =
@@ -143,7 +133,6 @@ export default function DataEntryPage() {
         });
 
         try {
-
             const savedCrop =
                 await apiRequest(
                     "/api/crops",
@@ -175,12 +164,6 @@ export default function DataEntryPage() {
             });
 
         } catch (error) {
-
-            console.error(
-                "Could not save crop:",
-                error,
-            );
-
             setStatus({
                 message:
                     error.message
@@ -189,14 +172,12 @@ export default function DataEntryPage() {
             });
 
         } finally {
-
             setIsSubmitting(false);
         }
     };
 
 
     const saveParcel = async (event) => {
-
         event.preventDefault();
 
         const location =
@@ -244,7 +225,6 @@ export default function DataEntryPage() {
         });
 
         try {
-
             const savedParcel =
                 await apiRequest(
                     "/api/parcels",
@@ -276,12 +256,6 @@ export default function DataEntryPage() {
             });
 
         } catch (error) {
-
-            console.error(
-                "Could not save parcel:",
-                error,
-            );
-
             setStatus({
                 message:
                     error.message
@@ -290,14 +264,12 @@ export default function DataEntryPage() {
             });
 
         } finally {
-
             setIsSubmitting(false);
         }
     };
 
 
     const saveActivity = async (event) => {
-
         event.preventDefault();
 
         const description =
@@ -329,7 +301,6 @@ export default function DataEntryPage() {
         });
 
         try {
-
             const savedActivity =
                 await apiRequest(
                     "/api/activities",
@@ -362,12 +333,6 @@ export default function DataEntryPage() {
             });
 
         } catch (error) {
-
-            console.error(
-                "Could not save activity:",
-                error,
-            );
-
             setStatus({
                 message:
                     error.message
@@ -376,14 +341,12 @@ export default function DataEntryPage() {
             });
 
         } finally {
-
             setIsSubmitting(false);
         }
     };
 
 
     const changeTab = (tabName) => {
-
         if (isSubmitting) {
             return;
         }
@@ -403,37 +366,60 @@ export default function DataEntryPage() {
     };
 
 
+    const renderStatus = () => {
+        if (!status.message) {
+            return null;
+        }
+
+        return (
+            <div
+                className={
+                    `form-alert ${status.type}`
+                }
+                role={
+                    status.type === "error"
+                        ? "alert"
+                        : "status"
+                }
+            >
+                {status.message}
+            </div>
+        );
+    };
+
+
     return (
         <main className="page-shell">
-
             <section className="page-header-card">
-
                 <span className="section-label">
-                    Agricultural Data Entry
+                    AgriSense AI Data Entry
                 </span>
 
                 <h1>
-                    Data Entry
+                    Agricultural Data Entry
                 </h1>
 
                 <p>
-                    Enter and store agricultural records in the
-                    system. Manage the main data categories used
-                    by the application: crops, parcels, and field
-                    activities.
+                    Add and store crop, parcel, and field
+                    activity records associated with your
+                    account.
                 </p>
-
             </section>
 
 
-            <section className="data-entry-tabs">
-
+            <section
+                className="data-entry-tabs"
+                aria-label="Agricultural data categories"
+            >
                 <button
                     type="button"
                     className={
                         activeTab === "crop"
                             ? "active"
                             : ""
+                    }
+                    aria-pressed={
+                        activeTab === "crop"
                     }
                     disabled={isSubmitting}
                     onClick={() =>
@@ -450,6 +436,9 @@ export default function DataEntryPage() {
                             ? "active"
                             : ""
                     }
+                    aria-pressed={
+                        activeTab === "parcel"
+                    }
                     disabled={isSubmitting}
                     onClick={() =>
                         changeTab("parcel")
@@ -465,6 +454,9 @@ export default function DataEntryPage() {
                             ? "active"
                             : ""
                     }
+                    aria-pressed={
+                        activeTab === "activity"
+                    }
                     disabled={isSubmitting}
                     onClick={() =>
                         changeTab("activity")
@@ -472,21 +464,16 @@ export default function DataEntryPage() {
                 >
                     Activity
                 </button>
-
             </section>
 
 
             <section className="crop-form-layout">
-
                 {activeTab === "crop" && (
-
                     <form
                         className="crop-form-card"
                         onSubmit={saveCrop}
                     >
-
                         <div className="form-group">
-
                             <label htmlFor="name">
                                 Crop name
                             </label>
@@ -500,13 +487,12 @@ export default function DataEntryPage() {
                                 value={cropData.name}
                                 disabled={isSubmitting}
                                 onChange={handleCropChange}
+                                required
                             />
-
                         </div>
 
 
                         <div className="form-group">
-
                             <label htmlFor="type">
                                 Crop type
                             </label>
@@ -520,13 +506,12 @@ export default function DataEntryPage() {
                                 value={cropData.type}
                                 disabled={isSubmitting}
                                 onChange={handleCropChange}
+                                required
                             />
-
                         </div>
 
 
                         <div className="form-group">
-
                             <label htmlFor="plantingDate">
                                 Planting date
                             </label>
@@ -540,8 +525,8 @@ export default function DataEntryPage() {
                                 }
                                 disabled={isSubmitting}
                                 onChange={handleCropChange}
+                                required
                             />
-
                         </div>
 
 
@@ -555,33 +540,17 @@ export default function DataEntryPage() {
                                 : "Save Crop"}
                         </button>
 
-
-                        {status.message && (
-
-                            <div
-                                className={
-                                    `form-alert ${status.type}`
-                                }
-                            >
-                                {status.message}
-                            </div>
-
-                        )}
-
+                        {renderStatus()}
                     </form>
-
                 )}
 
 
                 {activeTab === "parcel" && (
-
                     <form
                         className="crop-form-card"
                         onSubmit={saveParcel}
                     >
-
                         <div className="form-group">
-
                             <label htmlFor="location">
                                 Parcel location
                             </label>
@@ -597,13 +566,12 @@ export default function DataEntryPage() {
                                 }
                                 disabled={isSubmitting}
                                 onChange={handleParcelChange}
+                                required
                             />
-
                         </div>
 
 
                         <div className="form-group">
-
                             <label htmlFor="size">
                                 Parcel size
                             </label>
@@ -612,19 +580,18 @@ export default function DataEntryPage() {
                                 id="size"
                                 name="size"
                                 type="number"
-                                min="0.01"
-                                step="0.01"
+                                min="0"
+                                step="any"
                                 placeholder="Example: 2.5"
                                 value={parcelData.size}
                                 disabled={isSubmitting}
                                 onChange={handleParcelChange}
+                                required
                             />
-
                         </div>
 
 
                         <div className="form-group">
-
                             <label htmlFor="soilType">
                                 Soil type
                             </label>
@@ -640,8 +607,8 @@ export default function DataEntryPage() {
                                 }
                                 disabled={isSubmitting}
                                 onChange={handleParcelChange}
+                                required
                             />
-
                         </div>
 
 
@@ -655,33 +622,17 @@ export default function DataEntryPage() {
                                 : "Save Parcel"}
                         </button>
 
-
-                        {status.message && (
-
-                            <div
-                                className={
-                                    `form-alert ${status.type}`
-                                }
-                            >
-                                {status.message}
-                            </div>
-
-                        )}
-
+                        {renderStatus()}
                     </form>
-
                 )}
 
 
                 {activeTab === "activity" && (
-
                     <form
                         className="crop-form-card"
                         onSubmit={saveActivity}
                     >
-
                         <div className="form-group">
-
                             <label htmlFor="description">
                                 Activity description
                             </label>
@@ -699,13 +650,12 @@ export default function DataEntryPage() {
                                 onChange={
                                     handleActivityChange
                                 }
+                                required
                             />
-
                         </div>
 
 
                         <div className="form-group">
-
                             <label htmlFor="date">
                                 Activity date
                             </label>
@@ -721,13 +671,12 @@ export default function DataEntryPage() {
                                 onChange={
                                     handleActivityChange
                                 }
+                                required
                             />
-
                         </div>
 
 
                         <div className="form-group">
-
                             <label htmlFor="activityType">
                                 Activity type
                             </label>
@@ -745,8 +694,8 @@ export default function DataEntryPage() {
                                 onChange={
                                     handleActivityChange
                                 }
+                                required
                             />
-
                         </div>
 
 
@@ -760,40 +709,24 @@ export default function DataEntryPage() {
                                 : "Save Activity"}
                         </button>
 
-
-                        {status.message && (
-
-                            <div
-                                className={
-                                    `form-alert ${status.type}`
-                                }
-                            >
-                                {status.message}
-                            </div>
-
-                        )}
-
+                        {renderStatus()}
                     </form>
-
                 )}
 
 
                 <aside className="crop-preview-card">
-
                     <span className="section-label">
                         Current Input
                     </span>
 
 
                     {activeTab === "crop" && (
-
                         <>
                             <h2>
                                 Crop Preview
                             </h2>
 
                             <div className="preview-list">
-
                                 <div>
                                     <span>
                                         Name
@@ -826,22 +759,18 @@ export default function DataEntryPage() {
                                             || "Not selected"}
                                     </strong>
                                 </div>
-
                             </div>
                         </>
-
                     )}
 
 
                     {activeTab === "parcel" && (
-
                         <>
                             <h2>
                                 Parcel Preview
                             </h2>
 
                             <div className="preview-list">
-
                                 <div>
                                     <span>
                                         Location
@@ -875,22 +804,18 @@ export default function DataEntryPage() {
                                             || "Not entered"}
                                     </strong>
                                 </div>
-
                             </div>
                         </>
-
                     )}
 
 
                     {activeTab === "activity" && (
-
                         <>
                             <h2>
                                 Activity Preview
                             </h2>
 
                             <div className="preview-list">
-
                                 <div>
                                     <span>
                                         Description
@@ -923,17 +848,13 @@ export default function DataEntryPage() {
                                             || "Not entered"}
                                     </strong>
                                 </div>
-
                             </div>
                         </>
-
                     )}
 
 
                     {lastSavedRecord && (
-
                         <div className="saved-crop-box">
-
                             <span className="section-label">
                                 Last Saved Record
                             </span>
@@ -951,15 +872,10 @@ export default function DataEntryPage() {
                                     {lastSavedRecord.id}
                                 </strong>.
                             </p>
-
                         </div>
-
                     )}
-
                 </aside>
-
             </section>
-
         </main>
     );
 }

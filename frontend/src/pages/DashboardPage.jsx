@@ -45,12 +45,17 @@ function DataTable({
                         <thead>
                         <tr>
                             {columns.map((column) => (
-                                <th key={column.key}>
+                                <th
+                                    key={column.key}
+                                    scope="col"
+                                >
                                     {column.label}
                                 </th>
                             ))}
 
-                            <th>Actions</th>
+                            <th scope="col">
+                                Actions
+                            </th>
                         </tr>
                         </thead>
 
@@ -203,7 +208,8 @@ function EditDataForm({
                                 name="plantingDate"
                                 type="date"
                                 value={
-                                    editForm.plantingDate ?? ""
+                                    editForm.plantingDate
+                                    ?? ""
                                 }
                                 disabled={loading}
                                 onChange={handleChange}
@@ -226,7 +232,8 @@ function EditDataForm({
                                 type="text"
                                 maxLength={200}
                                 value={
-                                    editForm.location ?? ""
+                                    editForm.location
+                                    ?? ""
                                 }
                                 disabled={loading}
                                 onChange={handleChange}
@@ -243,10 +250,11 @@ function EditDataForm({
                                 id="edit-parcel-size"
                                 name="size"
                                 type="number"
-                                min="0.01"
-                                step="0.01"
+                                min="0"
+                                step="any"
                                 value={
-                                    editForm.size ?? ""
+                                    editForm.size
+                                    ?? ""
                                 }
                                 disabled={loading}
                                 onChange={handleChange}
@@ -265,7 +273,8 @@ function EditDataForm({
                                 type="text"
                                 maxLength={100}
                                 value={
-                                    editForm.soilType ?? ""
+                                    editForm.soilType
+                                    ?? ""
                                 }
                                 disabled={loading}
                                 onChange={handleChange}
@@ -288,7 +297,8 @@ function EditDataForm({
                                 type="text"
                                 maxLength={255}
                                 value={
-                                    editForm.description ?? ""
+                                    editForm.description
+                                    ?? ""
                                 }
                                 disabled={loading}
                                 onChange={handleChange}
@@ -307,7 +317,8 @@ function EditDataForm({
                                 type="text"
                                 maxLength={100}
                                 value={
-                                    editForm.type ?? ""
+                                    editForm.type
+                                    ?? ""
                                 }
                                 disabled={loading}
                                 onChange={handleChange}
@@ -325,7 +336,8 @@ function EditDataForm({
                                 name="date"
                                 type="date"
                                 value={
-                                    editForm.date ?? ""
+                                    editForm.date
+                                    ?? ""
                                 }
                                 disabled={loading}
                                 onChange={handleChange}
@@ -433,39 +445,40 @@ export default function DashboardPage() {
 
         let cancelled = false;
 
-        const loadInitialDashboard = async () => {
-            try {
-                const data =
-                    await fetchDashboardData();
+        const loadInitialDashboard =
+            async () => {
+                try {
+                    const data =
+                        await fetchDashboardData();
 
-                if (cancelled) {
-                    return;
+                    if (cancelled) {
+                        return;
+                    }
+
+                    setStats(data.stats);
+                    setCrops(data.crops);
+                    setParcels(data.parcels);
+                    setActivities(data.activities);
+
+                    setStatus({
+                        loading: false,
+                        message: "",
+                        type: "",
+                    });
+                } catch (error) {
+                    if (cancelled) {
+                        return;
+                    }
+
+                    setStatus({
+                        loading: false,
+                        message:
+                            error.message
+                            || "Could not load dashboard data.",
+                        type: "error",
+                    });
                 }
-
-                setStats(data.stats);
-                setCrops(data.crops);
-                setParcels(data.parcels);
-                setActivities(data.activities);
-
-                setStatus({
-                    loading: false,
-                    message: "",
-                    type: "",
-                });
-            } catch (error) {
-                if (cancelled) {
-                    return;
-                }
-
-                setStatus({
-                    loading: false,
-                    message:
-                        error.message
-                        || "Could not load dashboard data.",
-                    type: "error",
-                });
-            }
-        };
+            };
 
         loadInitialDashboard();
 
@@ -477,7 +490,6 @@ export default function DashboardPage() {
 
     const refreshDashboard =
         async (searchValue = "") => {
-
             const data =
                 await fetchDashboardData(
                     searchValue,
@@ -492,7 +504,6 @@ export default function DashboardPage() {
 
     const handleSearchSubmit =
         async (event) => {
-
             event.preventDefault();
 
             setStatus({
@@ -557,6 +568,7 @@ export default function DashboardPage() {
         row,
     ) => {
         setEditType(type);
+
         setEditForm({
             ...row,
         });
@@ -834,18 +846,18 @@ export default function DashboardPage() {
         <main className="dashboard-page">
             <section className="dashboard-hero">
                 <span className="section-label">
-                    Project Dashboard
+                    AgriSense AI Dashboard
                 </span>
 
                 <h1>
-                    Intelligent Agriculture Overview
+                    Agricultural Data Overview
                 </h1>
 
                 <p>
-                    View agricultural statistics,
-                    search your records, and manage
-                    crops, parcels, and field
-                    activities.
+                    View your agricultural statistics,
+                    search and manage records, and keep
+                    track of crops, parcels, and field
+                    activities from one dashboard.
                 </p>
 
                 {currentUser && (
@@ -899,7 +911,7 @@ export default function DashboardPage() {
                     <div className="dashboard-search-row">
                         <input
                             id="dashboard-search"
-                            type="text"
+                            type="search"
                             placeholder="Search by crop, type, location, soil, activity..."
                             value={search}
                             disabled={status.loading}
@@ -934,6 +946,11 @@ export default function DashboardPage() {
                 <div
                     className={
                         `dashboard-message ${status.type}`
+                    }
+                    role={
+                        status.type === "error"
+                            ? "alert"
+                            : "status"
                     }
                 >
                     {status.message}

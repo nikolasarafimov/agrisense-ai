@@ -51,32 +51,32 @@ public class SecurityConfig {
                                 )
                 )
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
-                        )
-                        .permitAll()
+                .authorizeHttpRequests(auth ->
+                        auth
+                                .requestMatchers(
+                                        HttpMethod.OPTIONS,
+                                        "/**"
+                                )
+                                .permitAll()
 
-                        .requestMatchers(
-                                "/api/users/login",
-                                "/api/users/register"
-                        )
-                        .permitAll()
+                                .requestMatchers(
+                                        "/api/users/login",
+                                        "/api/users/register",
+                                        "/api/weather/**",
+                                        "/api/health/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/api-docs/**"
+                                )
+                                .permitAll()
 
-                        .requestMatchers(
-                                "/api/weather/**",
-                                "/api/health/**"
-                        )
-                        .permitAll()
+                                .requestMatchers(
+                                        "/api/admin/**"
+                                )
+                                .hasRole("ADMIN")
 
-                        .requestMatchers(
-                                "/api/admin/**"
-                        )
-                        .hasRole("ADMIN")
-
-                        .anyRequest()
-                        .authenticated()
+                                .anyRequest()
+                                .authenticated()
                 )
 
                 .addFilterBefore(

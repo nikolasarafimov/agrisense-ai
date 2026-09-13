@@ -4,11 +4,14 @@ import { apiRequest, saveCurrentUser } from "../../../api";
 
 function LoginForm() {
     const navigate = useNavigate();
-
     const location = useLocation();
 
+    const requestedPath = location.state?.from?.pathname;
+
     const redirectPath =
-        location.state?.from?.pathname || "/dashboard";
+        typeof requestedPath === "string" && requestedPath.startsWith("/")
+            ? requestedPath
+            : "/dashboard";
 
     const [formData, setFormData] = useState({
         email: "",
@@ -43,6 +46,7 @@ function LoginForm() {
         }
 
         setLoading(true);
+
         setStatus({
             message: "Signing in...",
             type: "info",
@@ -57,16 +61,20 @@ function LoginForm() {
             saveCurrentUser(user);
 
             setStatus({
-                message: "Login successful. Redirecting to dashboard...",
+                message: "Login successful. Redirecting...",
                 type: "success",
             });
 
             setTimeout(() => {
-                navigate(redirectPath, { replace: true });
+                navigate(redirectPath, {
+                    replace: true,
+                });
             }, 700);
         } catch (error) {
             setStatus({
-                message: error.message || "Login failed. Please check your credentials.",
+                message:
+                    error.message ||
+                    "Login failed. Please check your credentials.",
                 type: "error",
             });
         } finally {
@@ -77,6 +85,7 @@ function LoginForm() {
     return (
         <form className="auth-form" onSubmit={handleSubmit}>
             <label htmlFor="login-email">Email</label>
+
             <input
                 id="login-email"
                 type="email"
@@ -84,10 +93,12 @@ function LoginForm() {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
                 required
             />
 
             <label htmlFor="login-password">Password</label>
+
             <input
                 id="login-password"
                 type="password"
@@ -95,16 +106,23 @@ function LoginForm() {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="current-password"
                 required
             />
 
             {status.message && (
-                <div className={`auth-message ${status.type}`}>
+                <div
+                    className={`auth-message ${status.type}`}
+                    role={status.type === "error" ? "alert" : "status"}
+                >
                     {status.message}
                 </div>
             )}
 
-            <button type="submit" disabled={loading}>
+            <button
+                type="submit"
+                disabled={loading}
+            >
                 {loading ? "Logging in..." : "Login"}
             </button>
         </form>

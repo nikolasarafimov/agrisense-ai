@@ -14,8 +14,7 @@ export default function ProfilePage() {
     const [
         currentUser,
         setCurrentUser,
-    ] =
-        useState(() => getCurrentUser());
+    ] = useState(() => getCurrentUser());
 
     const currentUserId =
         currentUser?.id ?? null;
@@ -82,6 +81,7 @@ export default function ProfilePage() {
                     message: "",
                     type: "",
                 });
+
             } catch (error) {
                 if (cancelled) {
                     return;
@@ -110,8 +110,7 @@ export default function ProfilePage() {
         const {
             name,
             value,
-        } =
-            event.target;
+        } = event.target;
 
         setFormData(
             (previousData) => ({
@@ -133,8 +132,16 @@ export default function ProfilePage() {
             return "Full name is required.";
         }
 
+        if (fullName.length > 100) {
+            return "Full name must not exceed 100 characters.";
+        }
+
         if (!email) {
             return "Email is required.";
+        }
+
+        if (email.length > 254) {
+            return "Email must not exceed 254 characters.";
         }
 
         if (!email.includes("@")) {
@@ -146,6 +153,10 @@ export default function ProfilePage() {
             && formData.password.length < 6
         ) {
             return "Password must contain at least 6 characters.";
+        }
+
+        if (formData.password.length > 72) {
+            return "Password must not exceed 72 characters.";
         }
 
         return "";
@@ -234,6 +245,7 @@ export default function ProfilePage() {
                     "Profile updated successfully.",
                 type: "success",
             });
+
         } catch (error) {
             setStatus({
                 message:
@@ -241,6 +253,7 @@ export default function ProfilePage() {
                     || "Could not update profile.",
                 type: "error",
             });
+
         } finally {
             setIsSaving(false);
         }
@@ -255,7 +268,7 @@ export default function ProfilePage() {
         <main className="page-shell">
             <section className="page-header-card">
                 <span className="section-label">
-                    User Profile
+                    AgriSense AI Profile
                 </span>
 
                 <h1>
@@ -264,7 +277,8 @@ export default function ProfilePage() {
 
                 <p>
                     View and update your account
-                    information and password.
+                    information and optionally change
+                    your password.
                 </p>
             </section>
 
@@ -288,6 +302,8 @@ export default function ProfilePage() {
                             }
                             disabled={formDisabled}
                             onChange={handleChange}
+                            autoComplete="name"
+                            maxLength={100}
                             required
                         />
                     </div>
@@ -307,6 +323,8 @@ export default function ProfilePage() {
                             }
                             disabled={formDisabled}
                             onChange={handleChange}
+                            autoComplete="email"
+                            maxLength={254}
                             required
                         />
                     </div>
@@ -314,8 +332,7 @@ export default function ProfilePage() {
 
                     <div className="form-field">
                         <label htmlFor="password">
-                            New Password
-                            {" "}
+                            New Password{" "}
                             <span>
                                 (optional)
                             </span>
@@ -331,7 +348,9 @@ export default function ProfilePage() {
                             }
                             disabled={formDisabled}
                             onChange={handleChange}
+                            autoComplete="new-password"
                             minLength={6}
+                            maxLength={72}
                         />
                     </div>
 
@@ -368,6 +387,11 @@ export default function ProfilePage() {
                         <div
                             className={
                                 `form-alert ${status.type}`
+                            }
+                            role={
+                                status.type === "error"
+                                    ? "alert"
+                                    : "status"
                             }
                         >
                             {status.message}

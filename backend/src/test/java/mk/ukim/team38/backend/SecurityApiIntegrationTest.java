@@ -330,52 +330,6 @@ class SecurityApiIntegrationTest {
                 );
     }
 
-    private String registerAndGetToken(
-            String email
-    ) throws Exception {
-
-        String requestBody =
-                """
-                {
-                  "fullName": "Test User",
-                  "email": "%s",
-                  "password": "password123"
-                }
-                """.formatted(email);
-
-        String responseBody =
-                mockMvc.perform(
-                                post(
-                                        "/api/users/register"
-                                )
-                                        .contentType(
-                                                MediaType.APPLICATION_JSON
-                                        )
-                                        .content(
-                                                requestBody
-                                        )
-                        )
-                        .andExpect(
-                                status().isOk()
-                        )
-                        .andExpect(
-                                jsonPath("$.token")
-                                        .isNotEmpty()
-                        )
-                        .andReturn()
-                        .getResponse()
-                        .getContentAsString();
-
-        JsonNode response =
-                objectMapper.readTree(
-                        responseBody
-                );
-
-        return response
-                .get("token")
-                .asText();
-    }
-
     @Test
     void registrationShouldRejectSameEmailWithDifferentCase()
             throws Exception {
@@ -385,12 +339,12 @@ class SecurityApiIntegrationTest {
         );
 
         String requestBody = """
-            {
-              "fullName": "Another User",
-              "email": "CASE-TEST@EXAMPLE.COM",
-              "password": "password123"
-            }
-            """;
+                {
+                  "fullName": "Another User",
+                  "email": "CASE-TEST@EXAMPLE.COM",
+                  "password": "password123"
+                }
+                """;
 
         mockMvc.perform(
                         post("/api/users/register")
@@ -423,11 +377,11 @@ class SecurityApiIntegrationTest {
         );
 
         String requestBody = """
-            {
-              "email": "MIXED-CASE@EXAMPLE.COM",
-              "password": "password123"
-            }
-            """;
+                {
+                  "email": "MIXED-CASE@EXAMPLE.COM",
+                  "password": "password123"
+                }
+                """;
 
         mockMvc.perform(
                         post("/api/users/login")
@@ -449,5 +403,51 @@ class SecurityApiIntegrationTest {
                                         "mixed-case@example.com"
                                 )
                 );
+    }
+
+    private String registerAndGetToken(
+            String email
+    ) throws Exception {
+
+        String requestBody =
+                """
+                {
+                  "fullName": "Test User",
+                  "email": "%s",
+                  "password": "password123"
+                }
+                """.formatted(email);
+
+        String responseBody =
+                mockMvc.perform(
+                                post(
+                                        "/api/users/register"
+                                )
+                                        .contentType(
+                                                MediaType.APPLICATION_JSON
+                                        )
+                                        .content(
+                                                requestBody
+                                        )
+                        )
+                        .andExpect(
+                                status().isCreated()
+                        )
+                        .andExpect(
+                                jsonPath("$.token")
+                                        .isNotEmpty()
+                        )
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        JsonNode response =
+                objectMapper.readTree(
+                        responseBody
+                );
+
+        return response
+                .get("token")
+                .asText();
     }
 }

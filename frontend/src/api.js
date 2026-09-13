@@ -1,23 +1,77 @@
+const configuredApiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL?.trim();
+
 export const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+    (
+        configuredApiBaseUrl
+        || "http://localhost:8080"
+    ).replace(/\/+$/, "");
+
+
+const CURRENT_USER_KEY =
+    "currentUser";
+
 
 export function saveCurrentUser(user) {
+    if (
+        !user
+        || typeof user !== "object"
+    ) {
+        clearCurrentUser();
+        return;
+    }
+
+    const existingUser =
+        getCurrentUser();
+
+    const userToStore = {
+        ...user,
+        ...(
+            !user.token
+            && existingUser?.token
+                ? {
+                    token:
+                    existingUser.token,
+                }
+                : {}
+        ),
+    };
+
     localStorage.setItem(
-        "currentUser",
-        JSON.stringify(user),
+        CURRENT_USER_KEY,
+        JSON.stringify(
+            userToStore,
+        ),
     );
 }
 
+
 export function getCurrentUser() {
     const storedUser =
-        localStorage.getItem("currentUser");
+        localStorage.getItem(
+            CURRENT_USER_KEY,
+        );
 
     if (!storedUser) {
         return null;
     }
 
     try {
-        return JSON.parse(storedUser);
+        const parsedUser =
+            JSON.parse(
+                storedUser,
+            );
+
+        if (
+            !parsedUser
+            || typeof parsedUser !== "object"
+        ) {
+            clearCurrentUser();
+            return null;
+        }
+
+        return parsedUser;
+
     } catch (error) {
         console.error(
             "Could not parse current user from localStorage.",
@@ -25,17 +79,72 @@ export function getCurrentUser() {
         );
 
         clearCurrentUser();
+
         return null;
     }
 }
 
+
 export function getAuthToken() {
-    return getCurrentUser()?.token ?? null;
+    return (
+        getCurrentUser()?.token
+        ?? null
+    );
 }
 
+
 export function clearCurrentUser() {
-    localStorage.removeItem("currentUser");
+    localStorage.removeItem(
+        CURRENT_USER_KEY,
+    );
 }
+
+
+async function readErrorMessage(
+    response,
+) {
+    let responseText = "";
+
+    try {
+        responseText =
+            await response.text();
+    } catch {
+        return "Request failed.";
+    }
+
+    if (!responseText) {
+        return "Request failed.";
+    }
+
+    const contentType =
+        response.headers.get(
+            "content-type",
+        ) || "";
+
+    if (
+        contentType.includes(
+            "application/json",
+        )
+    ) {
+        try {
+            const errorData =
+                JSON.parse(
+                    responseText,
+                );
+
+            return (
+                errorData.message
+                || errorData.error
+                || "Request failed."
+            );
+        } catch {
+            return "Request failed.";
+        }
+    }
+
+    return responseText;
+}
+
 
 export async function apiRequest(
     path,
@@ -50,9 +159,34 @@ export async function apiRequest(
     } = options;
 
     const headers = {
-        "Content-Type": "application/json",
         ...customHeaders,
     };
+
+    const hasBody =
+        requestOptions.body !== undefined
+        && requestOptions.body !== null;
+
+    const isFormData =
+        typeof FormData !== "undefined"
+        && requestOptions.body
+        instanceof FormData;
+
+    const hasContentType =
+        Object.keys(headers)
+            .some(
+                (headerName) =>
+                    headerName.toLowerCase()
+                    === "content-type",
+            );
+
+    if (
+        hasBody
+        && !isFormData
+        && !hasContentType
+    ) {
+        headers["Content-Type"] =
+            "application/json";
+    }
 
     if (token) {
         headers.Authorization =
@@ -69,45 +203,35 @@ export async function apiRequest(
         );
 
     if (!response.ok) {
-        if (response.status === 401) {
+        if (
+            response.status === 401
+        ) {
             clearCurrentUser();
         }
 
-        let message =
-            "Request failed.";
+        const message =
+            await readErrorMessage(
+                response,
+            );
 
-        try {
-            const errorData =
-                await response.json();
-
-            message =
-                errorData.message
-                || errorData.error
-                || message;
-        } catch {
-            const responseText =
-                await response.text();
-
-            if (responseText) {
-                message = responseText;
-            }
-        }
-
-        throw new Error(message);
+        throw new Error(
+            message,
+        );
     }
 
-    if (response.status === 204) {
+    if (
+        response.status === 204
+    ) {
         return null;
     }
 
     const contentType =
         response.headers.get(
             "content-type",
-        );
+        ) || "";
 
     if (
-        contentType
-        && contentType.includes(
+        contentType.includes(
             "application/json",
         )
     ) {
