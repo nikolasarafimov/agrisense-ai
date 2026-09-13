@@ -1,7 +1,12 @@
-# General
+# Operating system
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Logs and temporary files
 *.log
+*.tmp
+*.temp
 
 # IntelliJ / IDE
 .idea/
@@ -9,25 +14,37 @@ Thumbs.db
 .vscode/
 
 # Backend / Gradle
-backend/build/
-backend/.gradle/
 .gradle/
+backend/.gradle/
+backend/build/
+*.class
 
 # Frontend / Node
-frontend/node_modules/
-frontend/dist/
 node_modules/
 dist/
+frontend/node_modules/
+frontend/dist/
 
-# ML / Python
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python / ML
+__pycache__/
+*.py[cod]
+*.pyo
+
 ml/.venv/
 ml/venv/
 ml/__pycache__/
-ml/**/*.pyc
+ml/.pytest_cache/
+ml/.mypy_cache/
 
 # Environment files
 .env
+.env.*
 *.env
 
-# OS generated
-desktop.ini
+# Keep the public environment template
+!.env.example

@@ -10,8 +10,11 @@ import mk.ukim.team38.backend.exception.ConflictException;
 import mk.ukim.team38.backend.model.User;
 import mk.ukim.team38.backend.repository.UserRepository;
 import mk.ukim.team38.backend.security.JwtService;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -21,22 +24,43 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+    public AuthResponse register(
+            RegisterRequest request
+    ) {
+        String fullName =
+                request.getFullName().trim();
+
+        String email =
+                normalizeEmail(
+                        request.getEmail()
+                );
+
+        if (
+                userRepository
+                        .existsByEmailIgnoreCase(
+                                email
+                        )
+        ) {
             throw new ConflictException(
                     "User with this email already exists."
             );
         }
 
         User user = new User();
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
+
+        user.setFullName(fullName);
+        user.setEmail(email);
+
         user.setPassword(
-                passwordEncoder.encode(request.getPassword())
+                passwordEncoder.encode(
+                        request.getPassword()
+                )
         );
+
         user.setRole("USER");
 
-        User savedUser = userRepository.save(user);
+        User savedUser =
+                userRepository.save(user);
 
         return buildAuthResponse(
                 savedUser,
@@ -44,19 +68,33 @@ public class UserService {
         );
     }
 
-    public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(
-                        () -> new IllegalArgumentException(
-                                "Invalid email or password."
-                        )
+    public AuthResponse login(
+            LoginRequest request
+    ) {
+        String email =
+                normalizeEmail(
+                        request.getEmail()
                 );
 
-        if (!passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword()
-        )) {
-            throw new IllegalArgumentException(
+        User user =
+                userRepository
+                        .findByEmailIgnoreCase(
+                                email
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new BadCredentialsException(
+                                                "Invalid email or password."
+                                        )
+                        );
+
+        if (
+                !passwordEncoder.matches(
+                        request.getPassword(),
+                        user.getPassword()
+                )
+        ) {
+            throw new BadCredentialsException(
                     "Invalid email or password."
             );
         }
@@ -67,7 +105,9 @@ public class UserService {
         );
     }
 
-    public UserProfileResponse getProfile(User user) {
+    public UserProfileResponse getProfile(
+            User user
+    ) {
         return new UserProfileResponse(
                 user.getId(),
                 user.getFullName(),
@@ -80,28 +120,45 @@ public class UserService {
             User user,
             UpdateProfileRequest request
     ) {
+        String fullName =
+                request.getFullName().trim();
+
+        String email =
+                normalizeEmail(
+                        request.getEmail()
+                );
+
         if (
-                !user.getEmail().equalsIgnoreCase(request.getEmail())
-                        && userRepository.existsByEmail(request.getEmail())
+                !user.getEmail()
+                        .equalsIgnoreCase(email)
+                        && userRepository
+                        .existsByEmailIgnoreCase(
+                                email
+                        )
         ) {
             throw new ConflictException(
                     "User with this email already exists."
             );
         }
 
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
+        user.setFullName(fullName);
+        user.setEmail(email);
 
         if (
                 request.getPassword() != null
-                        && !request.getPassword().isBlank()
+                        && !request
+                        .getPassword()
+                        .isBlank()
         ) {
             user.setPassword(
-                    passwordEncoder.encode(request.getPassword())
+                    passwordEncoder.encode(
+                            request.getPassword()
+                    )
             );
         }
 
-        User savedUser = userRepository.save(user);
+        User savedUser =
+                userRepository.save(user);
 
         return buildAuthResponse(
                 savedUser,
@@ -113,7 +170,10 @@ public class UserService {
             User user,
             String message
     ) {
-        String token = jwtService.generateToken(user);
+        String token =
+                jwtService.generateToken(
+                        user
+                );
 
         return new AuthResponse(
                 user.getId(),
@@ -123,5 +183,15 @@ public class UserService {
                 token,
                 message
         );
+    }
+
+    private String normalizeEmail(
+            String email
+    ) {
+        return email
+                .trim()
+                .toLowerCase(
+                        Locale.ROOT
+                );
     }
 }

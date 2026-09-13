@@ -27,7 +27,7 @@ public class AuthenticatedUserService {
             throw new AccessDeniedException("Authentication is required.");
         }
 
-        return userRepository.findByEmail(authentication.getName())
+        return userRepository.findByEmailIgnoreCase(authentication.getName())
                 .orElseThrow(
                         () -> new AccessDeniedException(
                                 "Authenticated user was not found."
