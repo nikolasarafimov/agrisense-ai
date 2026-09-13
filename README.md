@@ -1,95 +1,144 @@
-# Intelligent Agriculture System
+# AgriSense AI
 
-Team 38 project for the course **ICT Project Management**.
+**AgriSense AI** is a full-stack academic prototype for agricultural data management and AI-assisted irrigation recommendations.
 
-The **Intelligent Agriculture System**, also presented as **AgriSense AI**, is a web-based academic prototype for managing agricultural data, integrating external weather data, supporting CSV/Excel import-export, and generating AI-supported agricultural recommendations. The project combines a Spring Boot backend, React frontend, PostgreSQL database, Docker Compose setup, and a separate FastAPI machine learning service.
+The platform allows authenticated users to manage crops, parcels, and agricultural activities, view personalized dashboard statistics, import and export agricultural data, access weather information, and generate machine-learning-supported irrigation recommendations.
 
----
+The system combines a React frontend, Spring Boot REST API, PostgreSQL database, FastAPI machine learning service, and Docker Compose.
 
-## Project Overview
-
-The purpose of this project is to support better agricultural decision-making through a digital platform that collects, stores, analyzes, and presents agricultural data in a structured way.
-
-The system allows users to manage information about crops, parcels, and agricultural activities. It also includes dashboard statistics, search and filtering, external weather API integration, CSV/Excel import-export functionality, and a machine learning module for generating irrigation-related agricultural recommendations.
-
-The project is developed as a working academic prototype and demonstrates how different system components can work together in an intelligent agriculture environment.
+> Developed by Team 38 for the **ICT Project Management** course.
 
 ---
 
-## Project Theme
+## Overview
 
-**Artificial Intelligence in Agriculture**
+AgriSense AI demonstrates how modern web technologies, external data sources, and machine learning can be combined into a single agricultural decision-support platform.
 
-Selected topic:
+The application provides:
 
-**Intelligent System for Analysis and Recommendations in Agriculture**
+- secure user registration and authentication
+- JWT-based authorization
+- user-owned agricultural records
+- crop, parcel, and activity management
+- personalized dashboard statistics
+- search and filtering
+- weather data integration
+- CSV and Excel import/export
+- AI-assisted irrigation recommendations
+- role-based administration
+- Dockerized multi-service deployment
+
+The project is designed as a working academic prototype with a clear separation between frontend, backend, database, and machine learning components.
 
 ---
 
 ## Main Features
 
+### Authentication and Security
+
 - User registration and login
-- User logout
-- User profile viewing and editing
-- Crop data management
-- Parcel data management
-- Agricultural activity tracking
-- View, edit and delete agricultural records
-- PostgreSQL database storage
-- Dashboard statistics
-- Search and filtering of agricultural data
-- External weather API integration
-- AI-supported irrigation recommendation interface
-- FastAPI machine learning service
-- CSV import and export
-- Excel import and export
-- Basic administrative panel with frontend role-based access check
-- React frontend with navigation and multiple pages
-- Spring Boot REST API backend
-- Docker Compose setup for easier project startup
+- JWT-based authentication
+- Password hashing
+- Protected backend endpoints
+- User-owned agricultural data
+- Role-based authorization
+- Backend-enforced `ADMIN` access
+- Protected frontend routes
+- Configurable CORS policy
+- Structured API error responses
+- Request validation
+
+### Agricultural Data Management
+
+Users can create, view, search, edit, and delete:
+
+- crops
+- parcels
+- agricultural activities
+
+Each record belongs to the authenticated user. User identity is derived from the JWT token and is never supplied through a `userId` request parameter.
+
+### Dashboard
+
+The dashboard provides statistics for the currently authenticated user:
+
+- number of crops
+- number of parcels
+- number of activities
+- total agricultural records
+
+It also provides search and record management functionality.
+
+### Import and Export
+
+Supported formats:
+
+- CSV
+- Microsoft Excel (`.xlsx`)
+
+Supported data:
+
+- crops
+- parcels
+- activities
+
+Imported data automatically belongs to the authenticated user.
+
+### Weather Integration
+
+The backend exposes a weather endpoint that retrieves weather information for selected coordinates.
+
+Weather information can include:
+
+- temperature
+- humidity
+- precipitation
+- wind speed
+
+### AI Recommendations
+
+The Spring Boot backend communicates with a separate FastAPI service that hosts the machine learning model.
+
+The ML component uses agricultural, soil, weather, and field-related input to generate irrigation-related predictions and recommendations.
+
+### Administration
+
+Users with the `ADMIN` role can access administrative functionality for:
+
+- users
+- crops
+- parcels
+- activities
+
+Admin authorization is enforced by Spring Security on the backend as well as by protected frontend routing.
 
 ---
 
 ## System Architecture
 
-The system is organized into four main services:
+```mermaid
+flowchart LR
+    U[User] --> F[React + Vite Frontend]
 
-```text
-Frontend     React + Vite application served through Nginx
-Backend      Spring Boot REST API
-Database     PostgreSQL database
-ML Service   FastAPI service for agricultural recommendations
+    F -->|REST / JSON + JWT| B[Spring Boot Backend]
+
+    B -->|JPA| DB[(PostgreSQL)]
+    B -->|HTTP| ML[FastAPI ML Service]
+    B -->|HTTP| W[External Weather API]
+
+    ML --> M[Trained ML Model]
 ```
 
-The frontend communicates with the backend through REST API calls. The backend stores and retrieves agricultural data from the PostgreSQL database. The backend also communicates with the FastAPI machine learning service to generate AI-supported recommendations. The weather functionality demonstrates integration with an external weather API.
+The system consists of four primary application components:
 
-```text
-React Frontend
-      |
-      v
-Spring Boot Backend
-      |
-      +--> PostgreSQL Database
-      |
-      +--> External Weather API
-      |
-      +--> FastAPI ML Service
-```
+| Component | Technology | Purpose |
+|---|---|---|
+| Frontend | React + Vite | User interface |
+| Backend | Spring Boot | REST API, security and business logic |
+| Database | PostgreSQL | Persistent application data |
+| ML Service | FastAPI | Irrigation prediction and recommendations |
 
----
-
-## Project Structure
-
-```text
-team38-intelligent-agriculture-system/
-├── backend/                 Spring Boot backend application
-├── frontend/                React + Vite frontend application
-├── ml/                      FastAPI machine learning service
-├── docs/                    Project documentation and supporting files
-├── docker-compose.yml       Multi-service Docker Compose configuration
-├── README.md                Project overview and setup instructions
-└── .gitignore
-```
+Docker Compose is used to run the complete system as a multi-container application.
 
 ---
 
@@ -100,7 +149,9 @@ team38-intelligent-agriculture-system/
 - React
 - Vite
 - React Router
+- JavaScript
 - CSS
+- Nginx
 
 ### Backend
 
@@ -108,116 +159,225 @@ team38-intelligent-agriculture-system/
 - Spring Boot
 - Spring Web
 - Spring Data JPA
+- Spring Security
 - Bean Validation
-- Spring Security Crypto
+- JJWT
 - PostgreSQL Driver
-- Gradle
 - Apache POI
 - OpenCSV
 - Springdoc OpenAPI
+- Gradle
 
 ### Database
 
 - PostgreSQL
+- H2 for automated backend tests
 
-### Machine Learning Service
+### Machine Learning
 
 - Python
 - FastAPI
-- scikit-learn
 - pandas
+- scikit-learn
 - joblib
 - Uvicorn
 
-### DevOps and Project Organization
+### DevOps and Tooling
 
 - Git
 - GitHub
-- Jira
 - Docker
 - Docker Compose
+- Jira
+- Gradle
+- npm
 
 ---
 
-## Backend Overview
-
-The backend is implemented as a Spring Boot REST API. It provides endpoints for managing users, crops, parcels, agricultural activities, dashboard statistics, weather data, recommendations, administrative records, and import/export operations.
-
-Main backend modules:
+## Project Structure
 
 ```text
-controller/      REST controllers
-dto/             Request and response objects
-model/           JPA entities
-repository/      Spring Data repositories
-service/         Business logic
-config/          CORS and application configuration
-```
-
-Main backend entities:
-
-```text
-User
-Crop
-Parcel
-Activity
+agrisense-ai/
+├── backend/
+│   ├── src/main/java/
+│   │   └── mk/ukim/team38/backend/
+│   │       ├── config/
+│   │       ├── controller/
+│   │       ├── dto/
+│   │       ├── exception/
+│   │       ├── model/
+│   │       ├── repository/
+│   │       ├── security/
+│   │       └── service/
+│   └── src/test/
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   └── Dockerfile
+│
+├── ml/
+│   ├── app/
+│   ├── data/
+│   └── requirements.txt
+│
+├── docs/
+│   └── import-export-specification.md
+│
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+└── README.md
 ```
 
 ---
 
-## Important Backend Endpoints
+## Security Model
 
-### Users
+AgriSense AI uses stateless JWT authentication.
+
+After successful registration or login, the backend returns a JWT token. The frontend sends the token with protected API requests:
 
 ```http
-POST   /api/users/register
-POST   /api/users/login
-POST   /api/users/logout
-GET    /api/users
-GET    /api/users/{id}
-POST   /api/users
-PUT    /api/users/{id}
-DELETE /api/users/{id}
+Authorization: Bearer <token>
 ```
+
+Spring Security validates the token before allowing access to protected resources.
+
+### Public endpoints
+
+The application exposes selected endpoints without authentication, including:
+
+```http
+POST /api/users/register
+POST /api/users/login
+GET  /api/weather
+GET  /api/health
+```
+
+### Authenticated endpoints
+
+Agricultural records, dashboard data, profile management, import/export, and recommendation functionality require authentication.
+
+### Administrator endpoints
+
+Routes under:
+
+```text
+/api/admin/**
+```
+
+require the authenticated user to have the `ADMIN` role.
+
+### Data Ownership
+
+Crop, parcel, and activity operations are scoped to the authenticated user.
+
+For example:
+
+```http
+GET /api/crops
+```
+
+returns only crops belonging to the current user.
+
+A client cannot access another user's records by supplying a different user ID.
+
+---
+
+## REST API Overview
+
+### Authentication and Profile
+
+```http
+POST /api/users/register
+POST /api/users/login
+
+GET  /api/users/me
+PUT  /api/users/me
+```
+
+Logout is handled on the frontend by removing the locally stored authentication state.
+
+---
 
 ### Crops
 
 ```http
 GET    /api/crops
 GET    /api/crops?search=tomato
-GET    /api/crops?userId=1
-GET    /api/crops?userId=1&search=tomato
 GET    /api/crops/{id}
+
 POST   /api/crops
 PUT    /api/crops/{id}
 DELETE /api/crops/{id}
 ```
+
+Example request:
+
+```json
+{
+  "name": "Tomato",
+  "type": "Vegetable",
+  "plantingDate": "2026-05-15"
+}
+```
+
+---
 
 ### Parcels
 
 ```http
 GET    /api/parcels
 GET    /api/parcels?search=loamy
-GET    /api/parcels?userId=1
-GET    /api/parcels?userId=1&search=loamy
 GET    /api/parcels/{id}
+
 POST   /api/parcels
 PUT    /api/parcels/{id}
 DELETE /api/parcels/{id}
 ```
+
+Example request:
+
+```json
+{
+  "location": "Skopje",
+  "size": 1200,
+  "soilType": "Loamy"
+}
+```
+
+---
 
 ### Activities
 
 ```http
 GET    /api/activities
 GET    /api/activities?search=irrigation
-GET    /api/activities?userId=1
-GET    /api/activities?userId=1&search=irrigation
 GET    /api/activities/{id}
+
 POST   /api/activities
 PUT    /api/activities/{id}
 DELETE /api/activities/{id}
 ```
+
+Example request:
+
+```json
+{
+  "description": "Morning irrigation",
+  "date": "2026-05-15",
+  "type": "Irrigation"
+}
+```
+
+Dates are represented using ISO format:
+
+```text
+yyyy-MM-dd
+```
+
+---
 
 ### Dashboard
 
@@ -225,315 +385,118 @@ DELETE /api/activities/{id}
 GET /api/dashboard/stats
 ```
 
-### Weather API
+Example response:
+
+```json
+{
+  "cropsCount": 5,
+  "parcelsCount": 3,
+  "activitiesCount": 8,
+  "totalRecords": 16
+}
+```
+
+Statistics are calculated only for the authenticated user.
+
+---
+
+### Weather
 
 ```http
 GET /api/weather?latitude=41.9981&longitude=21.4254
 ```
 
-### AI Recommendations
+Example coordinates:
+
+```text
+Latitude:  41.9981
+Longitude: 21.4254
+```
+
+---
+
+### Recommendations
 
 ```http
 POST /api/recommendations
 ```
 
-### Admin
+The backend forwards validated recommendation input to the FastAPI ML service.
+
+---
+
+### Import and Export
+
+```http
+GET  /api/data/export/crops
+POST /api/data/import/crops
+
+GET  /api/data/export/parcels
+POST /api/data/import/parcels
+
+GET  /api/data/export/activities
+POST /api/data/import/activities
+
+GET  /api/data/export/excel
+POST /api/data/import/excel
+```
+
+No `userId` parameter is required. The authenticated user is determined from the JWT token.
+
+---
+
+### Administration
 
 ```http
 GET    /api/admin/users
 GET    /api/admin/crops
 GET    /api/admin/parcels
 GET    /api/admin/activities
+
 DELETE /api/admin/users/{id}
 DELETE /api/admin/crops/{id}
 DELETE /api/admin/parcels/{id}
 DELETE /api/admin/activities/{id}
 ```
 
-### Import / Export
+These endpoints require the `ADMIN` role.
 
-```http
-GET  /api/data/export/crops?userId=1
-POST /api/data/import/crops?userId=1
+---
 
-GET  /api/data/export/parcels?userId=1
-POST /api/data/import/parcels?userId=1
+## API Error Format
 
-GET  /api/data/export/activities?userId=1
-POST /api/data/import/activities?userId=1
+Backend errors use a consistent JSON structure.
 
-GET  /api/data/export/excel?userId=1
-POST /api/data/import/excel?userId=1
+Example validation error:
+
+```json
+{
+  "timestamp": "2026-09-13T12:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed.",
+  "path": "/api/users/register",
+  "validationErrors": {
+    "email": "Email must be valid.",
+    "password": "Password must contain between 6 and 72 characters."
+  }
+}
 ```
 
-Swagger UI is available at:
+The API uses appropriate HTTP status codes including:
 
 ```text
-http://localhost:8080/swagger-ui.html
+400 Bad Request
+401 Unauthorized
+403 Forbidden
+404 Not Found
+409 Conflict
+500 Internal Server Error
 ```
 
 ---
 
-## Frontend Overview
-
-The frontend is implemented using React and Vite. It provides the user interface for interacting with the system.
-
-Main frontend pages:
-
-```text
-Home
-Dashboard
-Data Entry
-Profile
-Recommendations
-Import / Export
-Weather API
-Admin
-Login
-Register
-```
-
-The frontend includes forms for entering agricultural data, pages for importing and exporting files, dashboard statistics, search/filter functionality, edit/delete actions for agricultural records, weather API data display, and a recommendation page that communicates with the backend and the ML service.
-
-Frontend URL:
-
-```text
-http://localhost:5173
-```
-
----
-
-## Machine Learning Module Overview
-
-The machine learning module is implemented as a separate FastAPI service. It exposes an endpoint for generating predictions or recommendations based on agricultural, soil, weather and field-related input data.
-
-Important ML endpoints:
-
-```http
-GET  /health
-POST /predict
-```
-
-ML service URL:
-
-```text
-http://localhost:8000
-```
-
-If FastAPI documentation is enabled, it can be opened at:
-
-```text
-http://localhost:8000/docs
-```
-
----
-
-## Running the Full System with Docker Compose
-
-The recommended way to run the complete project is with Docker Compose.
-
-This starts:
-
-```text
-PostgreSQL database
-Spring Boot backend
-FastAPI ML service
-React frontend served through Nginx
-```
-
-From the root project folder, run:
-
-```bash
-docker compose up --build
-```
-
-After the services start, open:
-
-```text
-Frontend:        http://localhost:5173
-Backend:         http://localhost:8080
-Swagger UI:      http://localhost:8080/swagger-ui.html
-ML Service:      http://localhost:8000
-ML Docs:         http://localhost:8000/docs
-```
-
-To stop the system:
-
-```bash
-docker compose down
-```
-
-To stop the system and remove the database volume:
-
-```bash
-docker compose down -v
-```
-
-Use `docker compose down -v` only when a clean database reset is needed.
-
----
-
-## Running the Project Manually
-
-The project can also be started manually without Docker.
-
-### 1. Start PostgreSQL
-
-Create the database:
-
-```sql
-CREATE DATABASE agriculture_db;
-```
-
-Default backend database configuration:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/agriculture_db
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-```
-
-### 2. Start Backend
-
-On Windows:
-
-```powershell
-cd backend
-.\gradlew.bat bootRun
-```
-
-On Linux or macOS:
-
-```bash
-cd backend
-./gradlew bootRun
-```
-
-Backend runs on:
-
-```text
-http://localhost:8080
-```
-
-### 3. Start Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend runs on:
-
-```text
-http://localhost:5173
-```
-
-### 4. Start ML Service
-
-On Windows:
-
-```powershell
-cd ml
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-
-On Linux or macOS:
-
-```bash
-cd ml
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-
-ML service runs on:
-
-```text
-http://localhost:8000
-```
-
-If the main FastAPI file is named `app.py` instead of `app/main.py`, use:
-
-```bash
-uvicorn app:app --reload --port 8000
-```
-
----
-
-## Environment Configuration
-
-The frontend uses environment variables for API configuration.
-
-Example frontend environment configuration:
-
-```env
-VITE_API_BASE_URL=http://localhost:8080
-VITE_ML_API_BASE_URL=http://localhost:8000
-VITE_DEMO_USER_ID=1
-```
-
-The backend can use environment variables for database and ML service configuration:
-
-```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/agriculture_db
-SPRING_DATASOURCE_USERNAME=postgres
-SPRING_DATASOURCE_PASSWORD=postgres
-SPRING_JPA_HIBERNATE_DDL_AUTO=update
-ML_SERVICE_URL=http://localhost:8000
-```
-
-When running with Docker Compose, the backend uses the internal Docker service names:
-
-```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/agriculture_db
-ML_SERVICE_URL=http://ml-service:8000
-```
-
----
-
-## Import and Export Functionality
-
-The system supports CSV and Excel import/export for agricultural data.
-
-Supported CSV exports:
-
-```text
-crops.csv
-parcels.csv
-activities.csv
-```
-
-Supported Excel export:
-
-```text
-agriculture-data.xlsx
-```
-
-The Excel file contains separate sheets for:
-
-```text
-Crops
-Parcels
-Activities
-```
-
-Import/export operations are connected to the active user through the `userId` request parameter.
-
-Example endpoints:
-
-```http
-GET  /api/data/export/crops?userId=1
-POST /api/data/import/crops?userId=1
-GET  /api/data/export/excel?userId=1
-POST /api/data/import/excel?userId=1
-```
-
-CSV import examples:
+## Import and Export Formats
 
 ### Crops CSV
 
@@ -562,19 +525,48 @@ Soil fertilization,2026-05-16,Fertilization
 Pest inspection,2026-05-17,Crop Protection
 ```
 
----
+Excel export produces:
 
-## Recommendation Request Example
-
-The backend recommendation endpoint accepts agricultural, soil, weather and field-related input and forwards it to the FastAPI ML service when available.
-
-Endpoint:
-
-```http
-POST /api/recommendations
+```text
+agriculture-data.xlsx
 ```
 
-Example request body:
+with separate sheets:
+
+```text
+Crops
+Parcels
+Activities
+```
+
+Both CSV and Excel imports validate date fields and use ISO dates where textual dates are provided.
+
+---
+
+## Machine Learning Service
+
+The ML component runs independently as a FastAPI service.
+
+Main endpoints:
+
+```http
+GET  /health
+POST /predict
+```
+
+Local service URL:
+
+```text
+http://localhost:8000
+```
+
+FastAPI documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+### Recommendation Request Example
 
 ```json
 {
@@ -600,180 +592,422 @@ Example request body:
 }
 ```
 
-Example response:
-
-```json
-{
-  "recommendation": "High irrigation need detected. The field should be irrigated soon because the model predicts high water requirement.",
-  "predictionLabel": "High",
-  "probabilities": {
-    "High": 0.85,
-    "Medium": 0.12,
-    "Low": 0.03
-  },
-  "source": "FastAPI ML service",
-  "mlServiceAvailable": true
-}
-```
-
-The exact prediction label and probabilities depend on the ML model output.
+The exact prediction result depends on the trained model.
 
 ---
 
-## Weather API Example
+# Getting Started
 
-The weather endpoint fetches weather data for selected coordinates.
+## Prerequisites
 
-Endpoint:
+For Docker-based startup:
 
-```http
-GET /api/weather?latitude=41.9981&longitude=21.4254
+- Docker
+- Docker Compose
+
+For manual development:
+
+- Java 21
+- Node.js
+- npm
+- Python 3
+- PostgreSQL
+
+---
+
+## Environment Configuration
+
+Copy the example configuration:
+
+### Windows PowerShell
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-Example use:
+### Linux / macOS
 
-```text
-Latitude: 41.9981
-Longitude: 21.4254
+```bash
+cp .env.example .env
 ```
 
-These coordinates represent Skopje.
+The project uses the following environment variables:
 
-The displayed weather data includes values such as:
+```env
+POSTGRES_DB=agriculture_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=change_me
+
+SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+ML_SERVICE_URL=http://ml-service:8000
+
+VITE_API_BASE_URL=http://localhost:8080
+
+JWT_SECRET=REPLACE_WITH_32_BYTE_BASE64_SECRET
+JWT_EXPIRATION_MS=86400000
+
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+```
+
+Before starting the application, replace:
 
 ```text
-Temperature
-Humidity
-Precipitation
-Wind Speed
+POSTGRES_PASSWORD
+JWT_SECRET
+```
+
+with your own values.
+
+Do not commit `.env`.
+
+---
+
+## Generate a JWT Secret
+
+The JWT secret should be a sufficiently long Base64-encoded random value.
+
+One example using OpenSSL:
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the generated value into:
+
+```env
+JWT_SECRET=<generated-value>
+```
+
+The real secret must remain only in the local `.env` file or deployment secret management system.
+
+---
+
+# Running with Docker Compose
+
+Docker Compose is the recommended way to start the complete application.
+
+From the repository root:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+
+```text
+PostgreSQL
+Spring Boot backend
+FastAPI ML service
+React/Nginx frontend
+```
+
+After startup:
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| ML Service | http://localhost:8000 |
+| ML Documentation | http://localhost:8000/docs |
+
+Stop the application:
+
+```bash
+docker compose down
+```
+
+Stop the application and delete the PostgreSQL volume:
+
+```bash
+docker compose down -v
+```
+
+> `docker compose down -v` permanently removes the local Docker database volume and should only be used when a clean database reset is intended.
+
+---
+
+# Manual Development
+
+## Backend
+
+Ensure PostgreSQL is running and configure the required environment variables for the local database.
+
+### Windows
+
+```powershell
+cd backend
+.\gradlew.bat bootRun
+```
+
+### Linux / macOS
+
+```bash
+cd backend
+./gradlew bootRun
+```
+
+Backend:
+
+```text
+http://localhost:8080
 ```
 
 ---
 
-## User Roles and Admin Panel
+## Frontend
 
-The system supports basic user roles:
-
-```text
-USER
-ADMIN
+```bash
+cd frontend
+npm ci
+npm run dev
 ```
 
-Registered users are created as `USER` by default. The admin panel is shown only to users with the `ADMIN` role on the frontend.
-
-The admin panel allows reviewing and deleting:
+Frontend:
 
 ```text
-Users
-Crops
-Parcels
-Activities
+http://localhost:5173
 ```
 
-The admin access check is implemented at frontend prototype level. Full backend-level role enforcement with JWT/Spring Security can be added as a future improvement.
+The frontend communicates with the backend using:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+```
 
 ---
 
-## Demonstration Flow
+## Machine Learning Service
 
-Recommended demonstration order:
+### Windows
 
-1. Open the home page.
-2. Register or log in as a demo user.
-3. Open the dashboard and show statistics.
-4. Show search/filter functionality.
-5. Open the Data Entry page and show crop, parcel and activity forms.
-6. Open the Weather API page and fetch weather data.
-7. Open the Recommendations page and generate an AI-supported recommendation.
-8. Open the Import / Export page and export CSV or Excel data.
-9. Optionally show the Profile page.
-10. Optionally show the Admin page as an ADMIN user.
+```powershell
+cd ml
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
 
-For a short product video, the recommended focus is:
+### Linux / macOS
+
+```bash
+cd ml
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+ML service:
+
+```text
+http://localhost:8000
+```
+
+---
+
+# Testing
+
+## Backend Tests
+
+### Windows
+
+```powershell
+cd backend
+.\gradlew.bat clean test
+```
+
+### Linux / macOS
+
+```bash
+cd backend
+./gradlew clean test
+```
+
+The backend test suite includes coverage for areas such as:
+
+- application context startup
+- import/export endpoints
+- CSV date parsing
+- CSV date validation
+- authentication
+- authorization
+- invalid credentials
+- protected endpoints
+- validation errors
+- duplicate users
+- missing resources
+- case-insensitive email handling
+
+---
+
+## Frontend Validation
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+These commands verify frontend code quality and confirm that a production build can be generated successfully.
+
+---
+
+# Frontend Pages
+
+The React application contains the main pages required to demonstrate the platform:
 
 ```text
 Home
+Login
+Register
 Dashboard
-Weather API
+Data Entry
+Profile
+Recommendations
+Import / Export
+Weather
+Admin
+```
+
+Protected routes prevent unauthenticated users from opening secured application pages.
+
+The Admin page additionally requires the `ADMIN` role.
+
+---
+
+# Data Validation
+
+Backend request DTOs use Bean Validation.
+
+Examples include:
+
+- required names and descriptions
+- email format validation
+- password length validation
+- maximum text lengths
+- positive parcel sizes
+- required dates
+- `LocalDate` parsing
+- structured malformed-request handling
+
+Invalid request bodies return HTTP `400 Bad Request`.
+
+---
+
+# Demonstration Flow
+
+A recommended demonstration sequence is:
+
+1. Open the AgriSense AI home page.
+2. Register a new account.
+3. Log in and demonstrate JWT-protected navigation.
+4. Add a crop, parcel, and agricultural activity.
+5. Open the dashboard and view personalized statistics.
+6. Search agricultural records.
+7. Demonstrate edit and delete operations.
+8. Open the Weather page.
+9. Generate an AI-assisted recommendation.
+10. Export user data as CSV or Excel.
+11. Import agricultural data.
+12. Open the profile page.
+13. Optionally demonstrate `ADMIN` functionality.
+
+For a shorter demonstration:
+
+```text
+Authentication
+Dashboard
+Data Entry
+Weather
 AI Recommendations
 Import / Export
 ```
 
 ---
 
-## Project Management Context
+# Project Context
 
-The project was developed through multiple weekly phases:
+The project was developed incrementally through multiple phases, including:
 
-- Initial team organization and topic selection
-- Project specification preparation
+- team organization and topic selection
+- requirements and specification preparation
 - Jira and GitHub setup
-- Backend and frontend structure setup
-- Database schema development
-- Login/register UI development
-- CRUD functionality implementation
-- Dashboard and search/filter development
-- ML module research and model service preparation
-- Weather API research and integration
-- Import/export implementation
-- Docker Compose integration
-- Final system integration and testing
-- Final presentation and video preparation
+- backend and frontend initialization
+- relational database development
+- user authentication
+- agricultural CRUD functionality
+- dashboard implementation
+- search and filtering
+- machine learning research and model integration
+- weather integration
+- CSV/Excel import and export
+- Docker integration
+- authentication and authorization hardening
+- automated testing
+- final integration and documentation
 
 ---
 
-## Prototype Notes
+# Current Status
 
-This project is a working academic prototype. The main system components are implemented and can be demonstrated locally or through Docker Compose.
+AgriSense AI is a working academic prototype with the major application components fully integrated.
 
-Implemented parts include:
+Implemented functionality includes:
 
 ```text
-Spring Boot backend
 React frontend
-PostgreSQL database connection
-User registration and login
-User profile editing
-Crop, parcel and activity management
-View, edit and delete agricultural records
-CSV and Excel import/export
-Dashboard statistics
+Spring Boot REST API
+PostgreSQL persistence
+FastAPI ML service
+JWT authentication
+Spring Security authorization
+User-owned agricultural data
+ADMIN role enforcement
+Crop management
+Parcel management
+Activity management
+Profile management
+Personalized dashboard statistics
 Search and filtering
-Weather API integration
-AI/ML recommendation interface
-FastAPI ML prediction service
-Basic admin panel with frontend role check
-Docker Compose configuration
+Weather integration
+AI-assisted recommendations
+CSV import/export
+Excel import/export
+Request validation
+Structured API error handling
+Automated backend tests
+Docker Compose environment
 ```
 
-Some parts are implemented at prototype level and can be extended in future versions.
+---
+
+# Future Improvements
+
+Potential future development includes:
+
+- refresh-token authentication
+- account email verification
+- password reset workflow
+- database migrations with Flyway or Liquibase
+- production-grade secret management
+- expanded integration and end-to-end tests
+- CI/CD pipeline
+- cloud deployment
+- advanced dashboard analytics
+- expanded machine learning evaluation
+- additional agricultural recommendation models
+- deeper integration between live weather data and model predictions
+- centralized production logging and monitoring
+- further accessibility and responsive UI improvements
 
 ---
 
-## Future Improvements
+# Team
 
-Possible improvements include:
-
-- Full JWT-based authentication and authorization
-- Role-based access control enforced at backend level
-- Spring Security protection for admin endpoints
-- More advanced backend validation
-- More detailed integration between weather data and recommendations
-- Expanded AI recommendations for crop protection and activity selection
-- More detailed analytics dashboard
-- Expanded automated testing
-- Production deployment configuration
-- Improved error handling and logging
-- Improved UI feedback and loading states
-- Mobile-first responsive optimization
-
----
-
-## Team Information
-
-**Team Number:** 38
-
-**Team Members:**
+**Team 38 — ICT Project Management**
 
 1. Nikola Sarafimov
 2. Sofija Andonova
@@ -788,13 +1022,21 @@ Possible improvements include:
 
 ---
 
-## Project Status
+## Project Theme
 
-The project is prepared as a final working academic prototype for demonstration. It includes the main system components, organized project structure, Docker Compose setup, and documentation for running and testing the application.
+**Artificial Intelligence in Agriculture**
+
+**Selected topic:**  
+Intelligent System for Analysis and Recommendations in Agriculture
+
+---
+
+## Status
 
 ```text
-Status: Final academic prototype
+Project: AgriSense AI
+Type: Full-stack academic prototype
 Course: ICT Project Management
 Team: 38
-Theme: Artificial Intelligence in Agriculture
+Status: Working prototype
 ```
