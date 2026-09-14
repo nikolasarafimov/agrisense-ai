@@ -7,11 +7,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 import numpy as np
-from fastapi import (
-    FastAPI,
-    HTTPException,
-    Request,
-)
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -38,10 +34,7 @@ from app.utils import (
 
 logging.basicConfig(
     level=logging.INFO,
-    format=(
-        "%(asctime)s %(levelname)s "
-        "[%(name)s] %(message)s"
-    ),
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
 )
 
 logger = logging.getLogger(__name__)
@@ -49,9 +42,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    logger.info(
-        "Loading irrigation prediction artifacts.",
-    )
+    logger.info("Loading irrigation prediction artifacts.")
 
     load_artifacts_into_memory()
 
@@ -124,10 +115,7 @@ def health() -> dict[str, str]:
 def _normalize_to_batch(
     body: PredictRequestBody,
 ) -> list[dict[str, Any]]:
-    if isinstance(
-        body,
-        SinglePredictionRequest,
-    ):
+    if isinstance(body, SinglePredictionRequest):
         return [
             body.model_dump(),
         ]
@@ -136,8 +124,7 @@ def _normalize_to_batch(
         raise HTTPException(
             status_code=400,
             detail={
-                "message":
-                    "Batch must contain at least one record.",
+                "message": "Batch must contain at least one record.",
             },
         )
 
@@ -152,33 +139,30 @@ def _class_names_for_proba(
     label_encoder: Any,
     n_cols: int,
 ) -> list[str]:
-    model_classes =
-        getattr(
-            model,
-            "classes_",
-            None,
-        )
+    model_classes = getattr(
+        model,
+        "classes_",
+        None,
+    )
 
     if (
         model_classes is not None
         and len(model_classes) == n_cols
     ):
-        classes =
-            np.asarray(
-                model_classes,
-            ).ravel()
+        classes = np.asarray(
+            model_classes,
+        ).ravel()
 
         if np.issubdtype(
             classes.dtype,
             np.integer,
         ):
-            decoded =
-                label_encoder.inverse_transform(
-                    classes.astype(
-                        int,
-                        copy=False,
-                    ),
-                )
+            decoded = label_encoder.inverse_transform(
+                classes.astype(
+                    int,
+                    copy=False,
+                ),
+            )
 
             return [
                 str(value)
@@ -190,12 +174,11 @@ def _class_names_for_proba(
             for value in classes
         ]
 
-    encoder_classes =
-        getattr(
-            label_encoder,
-            "classes_",
-            None,
-        )
+    encoder_classes = getattr(
+        label_encoder,
+        "classes_",
+        None,
+    )
 
     if (
         encoder_classes is not None
@@ -222,19 +205,16 @@ def _build_probability_maps(
             "predict_proba returned an unexpected shape.",
         )
 
-    class_names =
-        _class_names_for_proba(
-            model,
-            label_encoder,
-            probabilities.shape[1],
-        )
+    class_names = _class_names_for_proba(
+        model,
+        label_encoder,
+        probabilities.shape[1],
+    )
 
     return [
         {
-            class_names[index]:
-                float(row[index])
-            for index
-            in range(len(class_names))
+            class_names[index]: float(row[index])
+            for index in range(len(class_names))
         }
         for row in probabilities
     ]
@@ -244,22 +224,20 @@ def _decode_predictions(
     predictions: Any,
     label_encoder: Any,
 ) -> list[str]:
-    flattened =
-        np.asarray(
-            predictions,
-        ).ravel()
+    flattened = np.asarray(
+        predictions,
+    ).ravel()
 
     if np.issubdtype(
         flattened.dtype,
         np.integer,
     ):
-        decoded =
-            label_encoder.inverse_transform(
-                flattened.astype(
-                    int,
-                    copy=False,
-                ),
-            )
+        decoded = label_encoder.inverse_transform(
+            flattened.astype(
+                int,
+                copy=False,
+            ),
+        )
 
         return [
             str(value)
@@ -276,28 +254,23 @@ def _predict_batch(
     artifacts: Artifacts,
     rows: list[dict[str, Any]],
 ) -> list[PredictionItem]:
-    raw_dataframe =
-        records_to_raw_dataframe(
-            rows,
-        )
+    raw_dataframe = records_to_raw_dataframe(
+        rows,
+    )
 
-    engineered_dataframe =
-        add_engineered_features(
-            raw_dataframe,
-            artifacts
-                .healthy_soil_moisture_threshold,
-        )
+    engineered_dataframe = add_engineered_features(
+        raw_dataframe,
+        artifacts.healthy_soil_moisture_threshold,
+    )
 
-    feature_dataframe =
-        reorder_features(
-            engineered_dataframe,
-        )
+    feature_dataframe = reorder_features(
+        engineered_dataframe,
+    )
 
     try:
-        transformed_features =
-            artifacts.preprocessor.transform(
-                feature_dataframe,
-            )
+        transformed_features = artifacts.preprocessor.transform(
+            feature_dataframe,
+        )
 
     except Exception as exc:
         logger.exception(
@@ -307,22 +280,19 @@ def _predict_batch(
         raise HTTPException(
             status_code=400,
             detail={
-                "message":
-                    "Input data could not be preprocessed.",
+                "message": "Input data could not be preprocessed.",
             },
         ) from exc
 
     try:
-        raw_predictions =
-            artifacts.model.predict(
-                transformed_features,
-            )
+        raw_predictions = artifacts.model.predict(
+            transformed_features,
+        )
 
-        labels =
-            _decode_predictions(
-                raw_predictions,
-                artifacts.label_encoder,
-            )
+        labels = _decode_predictions(
+            raw_predictions,
+            artifacts.label_encoder,
+        )
 
     except Exception as exc:
         logger.exception(
@@ -332,8 +302,7 @@ def _predict_batch(
         raise HTTPException(
             status_code=500,
             detail={
-                "message":
-                    "Prediction could not be generated.",
+                "message": "Prediction could not be generated.",
             },
         ) from exc
 
@@ -346,21 +315,18 @@ def _predict_batch(
         "predict_proba",
     ):
         try:
-            probabilities =
-                np.asarray(
-                    artifacts.model
-                        .predict_proba(
-                            transformed_features,
-                        ),
-                    dtype=float,
-                )
+            probabilities = np.asarray(
+                artifacts.model.predict_proba(
+                    transformed_features,
+                ),
+                dtype=float,
+            )
 
-            probability_maps =
-                _build_probability_maps(
-                    artifacts.model,
-                    artifacts.label_encoder,
-                    probabilities,
-                )
+            probability_maps = _build_probability_maps(
+                artifacts.model,
+                artifacts.label_encoder,
+                probabilities,
+            )
 
         except Exception:
             logger.warning(
@@ -381,11 +347,9 @@ def _predict_batch(
     return [
         PredictionItem(
             label=label,
-            probabilities=
-                probability_maps[index],
+            probabilities=probability_maps[index],
         )
-        for index, label
-        in enumerate(labels)
+        for index, label in enumerate(labels)
     ]
 
 
@@ -397,10 +361,9 @@ def _predict_batch(
 def predict(
     body: PredictRequestBody,
 ) -> PredictionResponse:
-    rows =
-        _normalize_to_batch(
-            body,
-        )
+    rows = _normalize_to_batch(
+        body,
+    )
 
     logger.info(
         "POST /predict request received: %s",
@@ -410,14 +373,12 @@ def predict(
         ),
     )
 
-    artifacts =
-        get_artifacts()
+    artifacts = get_artifacts()
 
-    predictions =
-        _predict_batch(
-            artifacts,
-            rows,
-        )
+    predictions = _predict_batch(
+        artifacts,
+        rows,
+    )
 
     logger.info(
         "Prediction succeeded batch_size=%s",

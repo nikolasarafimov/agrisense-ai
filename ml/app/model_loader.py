@@ -90,6 +90,7 @@ def _coerce_threshold(
         threshold = float(
             np.asarray(value).item(),
         )
+
     except (TypeError, ValueError) as exc:
         raise ValueError(
             "Healthy soil moisture threshold "
@@ -108,28 +109,23 @@ def _coerce_threshold(
 def _load_classifier(
     model_path: Path,
 ) -> Any:
-    loaded_model =
-        joblib.load(
-            model_path,
-        )
+    loaded_model = joblib.load(
+        model_path,
+    )
 
     if (
         isinstance(
             loaded_model,
             Pipeline,
         )
-        and "model"
-        in loaded_model.named_steps
+        and "model" in loaded_model.named_steps
     ):
         logger.info(
             "Using classifier from Pipeline "
             "named step 'model'.",
         )
 
-        return (
-            loaded_model
-            .named_steps["model"]
-        )
+        return loaded_model.named_steps["model"]
 
     return loaded_model
 
@@ -195,30 +191,25 @@ def load_artifacts_into_memory() -> Artifacts:
             path,
         )
 
-    model =
-        _load_classifier(
-            MODEL_PATH,
-        )
+    model = _load_classifier(
+        MODEL_PATH,
+    )
 
-    preprocessor =
-        joblib.load(
-            PREPROCESSOR_PATH,
-        )
+    preprocessor = joblib.load(
+        PREPROCESSOR_PATH,
+    )
 
-    label_encoder =
-        joblib.load(
-            LABEL_ENCODER_PATH,
-        )
+    label_encoder = joblib.load(
+        LABEL_ENCODER_PATH,
+    )
 
-    threshold_raw =
-        joblib.load(
-            THRESHOLD_PATH,
-        )
+    threshold_raw = joblib.load(
+        THRESHOLD_PATH,
+    )
 
-    threshold =
-        _coerce_threshold(
-            threshold_raw,
-        )
+    threshold = _coerce_threshold(
+        threshold_raw,
+    )
 
     _validate_artifacts(
         model,
@@ -226,16 +217,14 @@ def load_artifacts_into_memory() -> Artifacts:
         label_encoder,
     )
 
-    loaded_artifacts =
-        Artifacts(
-            model=model,
-            preprocessor=preprocessor,
-            label_encoder=label_encoder,
-            healthy_soil_moisture_threshold=threshold,
-        )
+    loaded_artifacts = Artifacts(
+        model=model,
+        preprocessor=preprocessor,
+        label_encoder=label_encoder,
+        healthy_soil_moisture_threshold=threshold,
+    )
 
-    _artifacts =
-        loaded_artifacts
+    _artifacts = loaded_artifacts
 
     logger.info(
         "ML artifacts loaded successfully "
