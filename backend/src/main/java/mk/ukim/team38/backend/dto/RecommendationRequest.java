@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class RecommendationRequest {
 
     @JsonProperty("Soil_pH")
@@ -91,156 +95,4 @@ public class RecommendationRequest {
     @JsonProperty("Region")
     @NotBlank(message = "Region is required.")
     private String region;
-
-    public Double getSoilPH() {
-        return soilPH;
-    }
-
-    public void setSoilPH(Double soilPH) {
-        this.soilPH = soilPH;
-    }
-
-    public Double getSoilMoisture() {
-        return soilMoisture;
-    }
-
-    public void setSoilMoisture(Double soilMoisture) {
-        this.soilMoisture = soilMoisture;
-    }
-
-    public Double getOrganicCarbon() {
-        return organicCarbon;
-    }
-
-    public void setOrganicCarbon(Double organicCarbon) {
-        this.organicCarbon = organicCarbon;
-    }
-
-    public Double getElectricalConductivity() {
-        return electricalConductivity;
-    }
-
-    public void setElectricalConductivity(Double electricalConductivity) {
-        this.electricalConductivity = electricalConductivity;
-    }
-
-    public Double getTemperatureC() {
-        return temperatureC;
-    }
-
-    public void setTemperatureC(Double temperatureC) {
-        this.temperatureC = temperatureC;
-    }
-
-    public Double getHumidity() {
-        return humidity;
-    }
-
-    public void setHumidity(Double humidity) {
-        this.humidity = humidity;
-    }
-
-    public Double getRainfallMm() {
-        return rainfallMm;
-    }
-
-    public void setRainfallMm(Double rainfallMm) {
-        this.rainfallMm = rainfallMm;
-    }
-
-    public Double getSunlightHours() {
-        return sunlightHours;
-    }
-
-    public void setSunlightHours(Double sunlightHours) {
-        this.sunlightHours = sunlightHours;
-    }
-
-    public Double getWindSpeedKmh() {
-        return windSpeedKmh;
-    }
-
-    public void setWindSpeedKmh(Double windSpeedKmh) {
-        this.windSpeedKmh = windSpeedKmh;
-    }
-
-    public Double getFieldAreaHectare() {
-        return fieldAreaHectare;
-    }
-
-    public void setFieldAreaHectare(Double fieldAreaHectare) {
-        this.fieldAreaHectare = fieldAreaHectare;
-    }
-
-    public Double getPreviousIrrigationMm() {
-        return previousIrrigationMm;
-    }
-
-    public void setPreviousIrrigationMm(Double previousIrrigationMm) {
-        this.previousIrrigationMm = previousIrrigationMm;
-    }
-
-    public String getSoilType() {
-        return soilType;
-    }
-
-    public void setSoilType(String soilType) {
-        this.soilType = soilType;
-    }
-
-    public String getCropType() {
-        return cropType;
-    }
-
-    public void setCropType(String cropType) {
-        this.cropType = cropType;
-    }
-
-    public String getCropGrowthStage() {
-        return cropGrowthStage;
-    }
-
-    public void setCropGrowthStage(String cropGrowthStage) {
-        this.cropGrowthStage = cropGrowthStage;
-    }
-
-    public String getSeason() {
-        return season;
-    }
-
-    public void setSeason(String season) {
-        this.season = season;
-    }
-
-    public String getIrrigationType() {
-        return irrigationType;
-    }
-
-    public void setIrrigationType(String irrigationType) {
-        this.irrigationType = irrigationType;
-    }
-
-    public String getWaterSource() {
-        return waterSource;
-    }
-
-    public void setWaterSource(String waterSource) {
-        this.waterSource = waterSource;
-    }
-
-    public String getMulchingUsed() {
-        return mulchingUsed;
-    }
-
-    public void setMulchingUsed(String mulchingUsed) {
-        this.mulchingUsed = mulchingUsed;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
 }

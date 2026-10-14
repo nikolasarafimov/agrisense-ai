@@ -72,33 +72,36 @@ public class AdminService {
     }
 
     public void deleteCrop(Long id) {
-        if (!cropRepository.existsById(id)) {
-            throw new ResourceNotFoundException(
-                    "Crop not found with id: " + id
-            );
-        }
+        Crop crop = cropRepository.findById(id)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                "Crop not found with id: " + id
+                        )
+                );
 
-        cropRepository.deleteById(id);
+        cropRepository.delete(crop);
     }
 
     public void deleteParcel(Long id) {
-        if (!parcelRepository.existsById(id)) {
-            throw new ResourceNotFoundException(
-                    "Parcel not found with id: " + id
-            );
-        }
+        Parcel parcel = parcelRepository.findById(id)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                "Parcel not found with id: " + id
+                        )
+                );
 
-        parcelRepository.deleteById(id);
+        parcelRepository.delete(parcel);
     }
 
     public void deleteActivity(Long id) {
-        if (!activityRepository.existsById(id)) {
-            throw new ResourceNotFoundException(
-                    "Activity not found with id: " + id
-            );
-        }
+        Activity activity = activityRepository.findById(id)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                "Activity not found with id: " + id
+                        )
+                );
 
-        activityRepository.deleteById(id);
+        activityRepository.delete(activity);
     }
 
     private UserProfileResponse toUserProfileResponse(

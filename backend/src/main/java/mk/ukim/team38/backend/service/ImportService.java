@@ -2,6 +2,7 @@ package mk.ukim.team38.backend.service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import lombok.RequiredArgsConstructor;
 import mk.ukim.team38.backend.model.Activity;
 import mk.ukim.team38.backend.model.Crop;
 import mk.ukim.team38.backend.model.Parcel;
@@ -29,21 +30,12 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ImportService {
 
     private final CropRepository cropRepository;
     private final ParcelRepository parcelRepository;
     private final ActivityRepository activityRepository;
-
-    public ImportService(
-            CropRepository cropRepository,
-            ParcelRepository parcelRepository,
-            ActivityRepository activityRepository
-    ) {
-        this.cropRepository = cropRepository;
-        this.parcelRepository = parcelRepository;
-        this.activityRepository = activityRepository;
-    }
 
     public Map<String, Object> importCropsCsv(
             MultipartFile file,
@@ -133,7 +125,7 @@ public class ImportService {
             }
 
         } catch (CsvValidationException e) {
-            throw new IOException(
+            throw new IllegalArgumentException(
                     "Invalid CSV file.",
                     e
             );
@@ -234,7 +226,7 @@ public class ImportService {
             }
 
         } catch (CsvValidationException e) {
-            throw new IOException(
+            throw new IllegalArgumentException(
                     "Invalid CSV file.",
                     e
             );
@@ -335,7 +327,7 @@ public class ImportService {
             }
 
         } catch (CsvValidationException e) {
-            throw new IOException(
+            throw new IllegalArgumentException(
                     "Invalid CSV file.",
                     e
             );
@@ -668,11 +660,8 @@ public class ImportService {
         }
 
         if (
-                cell.getCellType()
-                        == CellType.NUMERIC
-                        && DateUtil.isCellDateFormatted(
-                        cell
-                )
+                cell.getCellType() == CellType.NUMERIC
+                        && DateUtil.isCellDateFormatted(cell)
         ) {
             return cell
                     .getLocalDateTimeCellValue()
@@ -771,10 +760,7 @@ public class ImportService {
                 double value =
                         cell.getNumericCellValue();
 
-                if (
-                        value
-                                == Math.floor(value)
-                ) {
+                if (value == Math.floor(value)) {
                     yield String.valueOf(
                             (long) value
                     );

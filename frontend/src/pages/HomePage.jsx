@@ -14,28 +14,6 @@ function HomePage() {
                         service.
                     </p>
                 </div>
-
-                <div className="status-list">
-                    <div className="status-item">
-                        <span className="status-dot"></span>
-                        Spring Boot backend
-                    </div>
-
-                    <div className="status-item">
-                        <span className="status-dot"></span>
-                        PostgreSQL database
-                    </div>
-
-                    <div className="status-item">
-                        <span className="status-dot"></span>
-                        React frontend
-                    </div>
-
-                    <div className="status-item">
-                        <span className="status-dot"></span>
-                        FastAPI ML recommendation service
-                    </div>
-                </div>
             </section>
 
             <section className="home-grid">

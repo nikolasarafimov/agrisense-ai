@@ -12,10 +12,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Activity {
 
     @Id
@@ -61,65 +67,4 @@ public class Activity {
             "password"
     })
     private User user;
-
-    public Activity() {
-    }
-
-    public Activity(
-            String description,
-            LocalDate date,
-            String type
-    ) {
-        this.description = description;
-        this.date = date;
-        this.type = type;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setDescription(
-            String description
-    ) {
-        this.description = description;
-    }
-
-    public void setDate(
-            LocalDate date
-    ) {
-        this.date = date;
-    }
-
-    public void setType(
-            String type
-    ) {
-        this.type = type;
-    }
-
-    public void setUser(
-            User user
-    ) {
-        this.user = user;
-    }
 }

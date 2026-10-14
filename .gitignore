@@ -3,27 +3,25 @@
 Thumbs.db
 desktop.ini
 
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+
 # Logs and temporary files
 *.log
 *.tmp
 *.temp
 
-# IntelliJ / IDE
-.idea/
-*.iml
-.vscode/
-
-# Backend / Gradle
+# Java / Gradle
 .gradle/
-backend/.gradle/
 backend/build/
 *.class
 
-# Frontend / Node
+# Node / Vite
 node_modules/
 dist/
-frontend/node_modules/
-frontend/dist/
+coverage/
 
 npm-debug.log*
 yarn-debug.log*
@@ -33,13 +31,19 @@ pnpm-debug.log*
 # Python / ML
 __pycache__/
 *.py[cod]
-*.pyo
 
-ml/.venv/
-ml/venv/
-ml/__pycache__/
-ml/.pytest_cache/
-ml/.mypy_cache/
+.venv/
+venv/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+.coverage
+.coverage.*
+htmlcov/
+
+.ipynb_checkpoints/
 
 # Environment files
 .env

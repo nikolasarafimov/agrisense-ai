@@ -3,88 +3,119 @@ services:
     image: postgres:15
     container_name: agriculture-postgres
     restart: unless-stopped
+
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-agriculture_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+
     ports:
       - "5432:5432"
+
     volumes:
       - agriculture_postgres_data:/var/lib/postgresql/data
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-agriculture_db}"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
     networks:
       - agriculture-network
+
 
   ml-service:
     build:
       context: ./ml
       dockerfile: Dockerfile
+
     container_name: agriculture-ml-service
     restart: unless-stopped
+
     ports:
       - "8000:8000"
+
     healthcheck:
       test:
         [
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"
         ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
     networks:
       - agriculture-network
+
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+
     container_name: agriculture-backend
     restart: unless-stopped
+
     depends_on:
       postgres-db:
         condition: service_healthy
       ml-service:
         condition: service_healthy
+
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
-      ML_SERVICE_URL: ${ML_SERVICE_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/${POSTGRES_DB:-agriculture_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+
+      ML_SERVICE_URL: ${ML_SERVICE_URL:-http://ml-service:8000}
+
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+
     ports:
       - "8080:8080"
+
     networks:
       - agriculture-network
+
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+
     container_name: agriculture-frontend
     restart: unless-stopped
+
     depends_on:
       - backend
+
     ports:
       - "5173:80"
+
     networks:
       - agriculture-network
 
+
 volumes:
   agriculture_postgres_data:
+
 
 networks:
   agriculture-network:
