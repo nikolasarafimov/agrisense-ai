@@ -1,5 +1,7 @@
 # AgriSense AI
 
+[![CI](https://github.com/nikolasarafimov/agrisense-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/nikolasarafimov/agrisense-ai/actions/workflows/ci.yml)
+
 **AgriSense AI** is a full-stack academic prototype for agricultural data management and AI-assisted irrigation-need prediction.
 
 The platform enables authenticated users to manage crops, parcels, and agricultural activities, view personalized dashboard statistics, import and export agricultural data, retrieve weather information, and generate machine-learning-supported irrigation recommendations.

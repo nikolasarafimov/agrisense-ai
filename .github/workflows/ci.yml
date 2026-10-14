@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
+      - name: Run backend tests
+        run: ./gradlew clean test --no-daemon
+
+
+  frontend:
+    name: Frontend Lint and Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
+
+  ml-service:
+    name: ML Service Smoke Test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ml
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: ml/requirements.txt
+
+      - name: Install ML dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check Python source
+        run: python -m compileall app
+
+      - name: Start ML service
+        run: |
+          uvicorn app.main:app \
+            --host 127.0.0.1 \
+            --port 8000 \
+            > /tmp/agrisense-ml.log 2>&1 &
+          echo $! > /tmp/agrisense-ml.pid
+
+      - name: Wait for ML service
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8000/health; then
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          echo "ML service did not become healthy."
+          cat /tmp/agrisense-ml.log
+          exit 1
+
+      - name: Test ML prediction
+        run: |
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data '{
+              "Soil_pH": 6.8,
+              "Soil_Moisture": 32,
+              "Organic_Carbon": 1.2,
+              "Electrical_Conductivity": 0.8,
+              "Temperature_C": 32,
+              "Humidity": 35,
+              "Rainfall_mm": 2,
+              "Sunlight_Hours": 8,
+              "Wind_Speed_kmh": 12,
+              "Field_Area_hectare": 1.5,
+              "Previous_Irrigation_mm": 5,
+              "Soil_Type": "Loamy",
+              "Crop_Type": "Wheat",
+              "Crop_Growth_Stage": "Vegetative",
+              "Season": "Kharif",
+              "Irrigation_Type": "Drip",
+              "Water_Source": "Groundwater",
+              "Mulching_Used": "Yes",
+              "Region": "Central"
+            }' \
+            http://127.0.0.1:8000/predict
+
+      - name: Show ML logs on failure
+        if: failure()
+        run: |
+          if [ -f /tmp/agrisense-ml.log ]; then
+            cat /tmp/agrisense-ml.log
+          fi
