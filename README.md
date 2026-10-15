@@ -10,6 +10,8 @@ The system combines a React frontend, Spring Boot REST API, PostgreSQL database,
 
 > Developed by Team 38 for the **ICT Project Management** course.
 
+**Live application:** [https://agrisense-ai-six.vercel.app](https://agrisense-ai-six.vercel.app)
+
 ---
 
 ## Overview
